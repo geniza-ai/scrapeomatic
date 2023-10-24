@@ -1,0 +1,12 @@
+[FORMAT]
+max-line-length=200
+
+[MISCELLANEOUS]
+
+# List of note tags to take in consideration, separated by a comma.
+notes=FIXME,XXX,TODO
+
+[MASTER]
+extension-pkg-whitelist=pydantic
+
+disable=unnecessary-pass,missing-module-docstring,missing-function-docstring,missing-class-docstring,logging-fstring-interpolation

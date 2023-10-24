@@ -1,0 +1,7 @@
+selenium
+webdriver-manager
+packaging
+html5lib
+bs4
+fake_headers
+emoji
