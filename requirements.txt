@@ -1,7 +1,9 @@
-selenium
+selenium~=4.14.0
 webdriver-manager
 packaging
 html5lib
 bs4
 fake_headers
-emoji
+emoji~=1.7.0
+requests~=2.31.0
+configparser~=6.0.0

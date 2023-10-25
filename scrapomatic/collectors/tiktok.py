@@ -18,9 +18,10 @@ DEFAULT_BROWSER = "chrome"
 
 class TikTok(Collector):
 
-    def __init__(self, browser_name: str):
+    def __init__(self, browser_name=None, proxy=None):
         # Initialize the driver.  Default to chrome
         self.hashtags = {}
+        self.proxy = proxy
         if not browser_name:
             browser_name = DEFAULT_BROWSER
 
@@ -86,7 +87,7 @@ class TikTok(Collector):
 
     @staticmethod
     def __set_properties(browser_option):
-        ua = Headers().generate()  # fake user agent
+        user_agent = Headers().generate()  # fake user agent
         browser_option.add_argument('--headless')
         browser_option.add_argument('--disable-extensions')
         browser_option.add_argument('--incognito')
@@ -94,7 +95,7 @@ class TikTok(Collector):
         browser_option.add_argument("--disable-dev-shm-usage")
         browser_option.add_argument('--disable-gpu')
         browser_option.add_argument('--log-level=3')
-        browser_option.add_argument(f'user-agent={ua}')
+        browser_option.add_argument(f'user-agent={user_agent}')
         browser_option.add_argument('--disable-notifications')
         browser_option.add_argument('--disable-popup-blocking')
 
