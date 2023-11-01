@@ -15,6 +15,9 @@ Scrap-o-Matic will work with the following platforms:
 ## Usage:
 Every platform inherits from a `collector` object which has a minimum of one method: `collect(username)`.  The collectors may have additional methods, but at a minimum, you can use the `collect` method to get a dump of all the available data from the platform.
 
+Additionally, every collector has a `collect_to_dataframe` which will return the same information in a Pandas DataFrame.
+
+
 ## Instagram
 To pull data from Instagram, simply create an Instagram object, then call the `collect(<username>)` method.
 

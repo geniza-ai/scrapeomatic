@@ -3,11 +3,10 @@ from fake_headers import Headers
 from requests import HTTPError
 
 from scrapomatic.collector import Collector
+from scrapomatic.utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL
 
 
 class Instagram(Collector):
-    BASE_URL = "https://www.instagram.com"
-    PROFILE_URL = BASE_URL + "/api/v1/users/web_profile_info/"
 
     def __init__(self, timeout=5, proxy=None):
         self.proxy = proxy
@@ -21,7 +20,7 @@ class Instagram(Collector):
         """
         headers = Instagram.__build_headers(username)
         params = Instagram.__build_param(username)
-        response = self.__make_request(url=Instagram.PROFILE_URL, headers=headers, params=params)
+        response = self.__make_request(url=INSTAGRAM_PROFILE_URL, headers=headers, params=params)
         if response.status_code != 200:
             raise HTTPError(f"Error retrieving profile for {username}.  Status Code: {response.status_code}")
         return response.json()['data']['user']
@@ -38,7 +37,7 @@ class Instagram(Collector):
             'authority': 'www.instagram.com',
             'accept': '*/*',
             'accept-language': 'en-US,en;q=0.9',
-            'referer': f"{Instagram.BASE_URL}/{username}/",
+            'referer': f"{INSTAGRAM_BASE_URL}/{username}/",
             'sec-ch-prefers-color-scheme': 'dark',
             'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Microsoft Edge";v="108"',
             'sec-fetch-dest': 'empty',

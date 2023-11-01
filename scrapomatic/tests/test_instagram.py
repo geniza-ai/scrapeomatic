@@ -7,7 +7,7 @@ from scrapomatic.collectors.instagram import Instagram
 
 class TestInstagramScraper(unittest.TestCase):
     """
-    This class tests the Instagram scraper. It does not test the FastAPI calls.
+    This class tests the Instagram scraper.
     """
 
     def test_basic_call(self):

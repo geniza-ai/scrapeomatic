@@ -4,6 +4,7 @@ packaging
 html5lib
 bs4
 fake_headers
-emoji~=1.7.0
+emoji==2.8.0
 requests~=2.31.0
 configparser~=6.0.0
+pandas~=2.1.1

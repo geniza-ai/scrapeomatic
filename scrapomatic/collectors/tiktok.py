@@ -11,9 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
 from scrapomatic.collector import Collector
-
-TIKTOK_BASE_URL = "https://tiktok.com/@"
-DEFAULT_BROWSER = "chrome"
+from scrapomatic.utils.constants import DEFAULT_BROWSER, TIKTOK_BASE_URL
 
 
 class TikTok(Collector):
@@ -30,6 +28,11 @@ class TikTok(Collector):
         if browser_name == "chrome":
             browser_option = ChromeOptions()
             browser_option = self.__set_properties(browser_option)
+
+            # Add proxy server if present.
+            if self.proxy is not None:
+                browser_option.add_argument(f'--proxy-server={self.proxy}')
+
             service = ChromeService(ChromeDriverManager().install())
             self.driver = webdriver.Chrome(service=service, options=browser_option)
         elif browser_name == "firefox":
@@ -87,7 +90,7 @@ class TikTok(Collector):
 
     @staticmethod
     def __set_properties(browser_option):
-        user_agent = Headers().generate()  # fake user agent
+        user_agent = Headers().generate()
         browser_option.add_argument('--headless')
         browser_option.add_argument('--disable-extensions')
         browser_option.add_argument('--incognito')

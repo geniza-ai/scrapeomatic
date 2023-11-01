@@ -1,4 +1,5 @@
 import abc
+import pandas as pd
 
 
 class Collector(metaclass=abc.ABCMeta):
@@ -22,3 +23,11 @@ class Collector(metaclass=abc.ABCMeta):
         :return:  A dict of all the data returned.
         """
         raise NotImplementedError
+
+    def collect_to_dataframe(self, username: str) -> pd.DataFrame:
+        """
+        Returns a pandas dataframe of the target user.
+        :param username: The target username
+        :return: A pandas DataFrame of the data from the desired user profile.
+        """
+        return pd.DataFrame(self.collect(username))
