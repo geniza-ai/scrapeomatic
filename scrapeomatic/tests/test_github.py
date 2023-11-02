@@ -1,7 +1,7 @@
 import unittest
 
 from pprint import pprint
-from scrapeomatic.collectors.github import Github
+from scrapomatic.collectors.github import Github
 
 
 class TestGitHubScraper(unittest.TestCase):
