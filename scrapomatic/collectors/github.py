@@ -28,29 +28,15 @@ class Github(Collector):
         soup = BeautifulSoup(response.text, "html.parser")
         user_data = {}
 
-        return ""
+        user_data['full_name'] = soup.find(itemprop="name").get_text().strip()
+        user_data['additional_name'] = soup.find(itemprop="additionalName").get_text().strip()
+        user_data['bio'] = soup.find("div", class_="p-note user-profile-bio mb-3 js-user-profile-bio f4").get('data-bio-text')
+        user_data['email'] = soup.find(itemprop="email")
 
-    @staticmethod
-    def __build_headers() -> dict:
-        return {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Connection': 'keep-alive',
-            'Host': 'github.com',
-            'If - None - Match': 'W/"ed584c87c3fd45b6878f0ea5a259d6d1"',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'User-Agent': Headers().generate()['User-Agent'],
-        }
+        return user_data
 
         """
-        full_name = driver.find_element_by_css_selector("span.p-name.vcard-fullname.d-block.overflow-hidden")
-        try:
-            bio = driver.find_element_by_css_selector("div.p-note.user-profile-bio.mb-3.js-user-profile-bio.f4")
-        except NoSuchElementException:
-            bio = ""
+    
         try:
             location = driver.find_element_by_css_selector("span.p-label")
         except NoSuchElementException:

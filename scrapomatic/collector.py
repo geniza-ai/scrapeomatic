@@ -38,6 +38,13 @@ class Collector(metaclass=abc.ABCMeta):
         return pd.DataFrame(self.collect(username))
 
     def make_request(self, url, params=None, headers=None):
+        """
+        Utility method to make an HTTP request.
+        :param url:
+        :param params:
+        :param headers:
+        :return:
+        """
         if headers is None:
             headers = {}
         if params is None:

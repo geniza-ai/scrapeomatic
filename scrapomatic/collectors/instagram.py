@@ -1,4 +1,3 @@
-import requests
 from fake_headers import Headers
 from requests import HTTPError
 
