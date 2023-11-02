@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
 from requests import HTTPError
+from fake_headers import Headers
 
-from scrapeomatic.collector import Collector
-from scrapeomatic.utils.constants import GITHUB_BASE_URL
+from scrapomatic.collector import Collector
+from scrapomatic.utils.constants import GITHUB_BASE_URL
 
 
 class Github(Collector):
@@ -14,7 +15,7 @@ class Github(Collector):
 
     def collect(self, username: str) -> dict:
         """
-        Collects information about a given user's Github account
+        Collects information about a given user's github account
         :param username:
         :return:
         """
@@ -27,34 +28,29 @@ class Github(Collector):
         soup = BeautifulSoup(response.text, "html.parser")
         user_data = {}
 
-        user_data['full_name'] = soup.find(itemprop="name").get_text().strip()
-        user_data['additional_name'] = soup.find(itemprop="additionalName").get_text().strip()
-        user_data['bio'] = soup.find("div", class_="p-note user-profile-bio mb-3 js-user-profile-bio f4").get('data-bio-text').strip()
-        user_data['email'] = soup.find(itemprop="email")
-        user_data['works_for'] = soup.find(itemprop="worksFor").get_text().strip()
-        user_data['location'] = soup.find(itemprop="homeLocation").get_text().strip()
-        user_data['url'] = soup.find(itemprop="url").get_text().strip()
-
-        # Github allows multiple social media accounts
-        user_data['social'] = {}
-        social_data = soup.findAll(itemprop="social")
-        for account in social_data:
-            account_parts = Github.__get_social_media_accounts(account.get_text())
-            user_data['social'][account_parts['platform']] = account_parts['username']
-
-        return user_data
+        return ""
 
     @staticmethod
-    def __get_social_media_accounts(raw_info: str) -> dict:
-        parts = raw_info.rstrip().lstrip().split()
-
-        # Remove empty elements
-        parts = list(filter(None, parts))
-        result = {'platform': parts[0].strip(), 'username': parts[1].strip()}
-        return result
+    def __build_headers() -> dict:
+        return {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Connection': 'keep-alive',
+            'Host': 'github.com',
+            'If - None - Match': 'W/"ed584c87c3fd45b6878f0ea5a259d6d1"',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'User-Agent': Headers().generate()['User-Agent'],
+        }
 
         """
-    
+        full_name = driver.find_element_by_css_selector("span.p-name.vcard-fullname.d-block.overflow-hidden")
+        try:
+            bio = driver.find_element_by_css_selector("div.p-note.user-profile-bio.mb-3.js-user-profile-bio.f4")
+        except NoSuchElementException:
+            bio = ""
         try:
             location = driver.find_element_by_css_selector("span.p-label")
         except NoSuchElementException:
