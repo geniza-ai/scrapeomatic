@@ -1,11 +1,16 @@
 import abc
 import pandas as pd
+import requests
 
 
 class Collector(metaclass=abc.ABCMeta):
     """
     This class is an interface for all the data collectors in scrape-o-matic.
     """
+
+    def __init__(self, timeout: int, proxy: dict):
+        self.proxy = proxy
+        self.timeout = timeout
 
     @classmethod
     def __subclasshook__(cls, subclass):
@@ -31,3 +36,17 @@ class Collector(metaclass=abc.ABCMeta):
         :return: A pandas DataFrame of the data from the desired user profile.
         """
         return pd.DataFrame(self.collect(username))
+
+    def make_request(self, url, params=None, headers=None):
+        if headers is None:
+            headers = {}
+        if params is None:
+            params = {}
+        if self.proxy:
+            proxy_dict = {
+                'http': f'http://{self.proxy}',
+                'https': f'http://{self.proxy}'
+            }
+            return requests.get(url, headers=headers, timeout=self.timeout, params=params, proxies=proxy_dict)
+
+        return requests.get(url, timeout=self.timeout, headers=headers, params=params)
