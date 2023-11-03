@@ -10,8 +10,8 @@ from fake_headers import Headers
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
-from scrapomatic.collector import Collector
-from scrapomatic.utils.constants import DEFAULT_BROWSER, TIKTOK_BASE_URL
+from scrapeomatic.collector import Collector
+from scrapeomatic.utils.constants import DEFAULT_BROWSER, TIKTOK_BASE_URL
 
 
 class TikTok(Collector):
