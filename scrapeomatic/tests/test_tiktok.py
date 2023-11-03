@@ -1,5 +1,5 @@
 import unittest
-from scrapomatic.collectors.tiktok import TikTok
+from scrapeomatic.collectors.tiktok import TikTok
 
 
 class TestTikTokScraper(unittest.TestCase):

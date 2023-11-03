@@ -2,7 +2,7 @@ import unittest
 
 from requests import HTTPError
 
-from scrapomatic.collectors.instagram import Instagram
+from scrapeomatic.collectors.instagram import Instagram
 
 
 class TestInstagramScraper(unittest.TestCase):

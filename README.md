@@ -22,8 +22,9 @@ Additionally, every collector has a `collect_to_dataframe` which will return the
 To pull data from Instagram, simply create an Instagram object, then call the `collect(<username>)` method.
 
 ### Example Usage
+
 ```python
-from scrapomatic.collectors.instagram import Instagram
+from scrapeomatic.collectors.instagram import Instagram
 
 user_name = "<username>"
 instagram_scraper = Instagram()
@@ -40,8 +41,9 @@ In the constructor, you can specify two additional options:
 To pull data from TikTok, simply create a TikTok object, then call the `collect(<username>)` method.
 
 ### Example Usage
+
 ```python
-from scrapomatic.collectors.tiktok import TikTok
+from scrapeomatic.collectors.tiktok import TikTok
 
 user_name = "<username>"
 tiktok_scraper = TikTok()
