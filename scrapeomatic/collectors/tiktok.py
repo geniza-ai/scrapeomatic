@@ -11,12 +11,13 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
 from scrapeomatic.collector import Collector
-from scrapeomatic.utils.constants import DEFAULT_BROWSER, TIKTOK_BASE_URL
+from scrapeomatic.utils.constants import DEFAULT_BROWSER, TIKTOK_BASE_URL, DEFAULT_TIMEOUT
 
 
 class TikTok(Collector):
 
     def __init__(self, browser_name=None, proxy=None):
+        super().__init__(DEFAULT_TIMEOUT, proxy)
         # Initialize the driver.  Default to chrome
         self.hashtags = {}
         self.proxy = proxy

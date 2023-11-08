@@ -1,4 +1,5 @@
 DEFAULT_BROWSER = "chrome"
+DEFAULT_TIMEOUT = 5
 
 # Base URLs
 GITHUB_BASE_URL = "https://github.com"

@@ -24,13 +24,14 @@ class GitHub(Collector):
             raise HTTPError(f"Error retrieving profile for {username}.  Status Code: {response.status_code}")
 
         # Now parse the incoming data
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = BeautifulSoup(response.text, "html5lib")
         user_data = {}
 
         user_data['full_name'] = soup.find(itemprop="name").get_text().strip()
         user_data['additional_name'] = soup.find(itemprop="additionalName").get_text().strip()
         user_data['bio'] = soup.find("div", class_="p-note user-profile-bio mb-3 js-user-profile-bio f4").get(
             'data-bio-text').strip()
+        # FIX THIS: Email not being picked up
         user_data['email'] = soup.find(itemprop="email")
         user_data['works_for'] = soup.find(itemprop="worksFor").get_text().strip()
         user_data['location'] = soup.find(itemprop="homeLocation").get_text().strip()
@@ -58,15 +59,6 @@ class GitHub(Collector):
         return result
 
         """
-
-        try:
-            location = driver.find_element_by_css_selector("span.p-label")
-        except NoSuchElementException:
-            location = ""
-        try:
-            email = driver.find_element_by_css_selector("li[itemprop='email']")
-        except NoSuchElementException:
-            email = ""
 
         try:
             contributions = driver.find_element_by_css_selector(".js-yearly-contributions")
