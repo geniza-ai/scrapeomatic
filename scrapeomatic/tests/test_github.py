@@ -1,7 +1,7 @@
 import unittest
 
 from pprint import pprint
-from scrapomatic.collectors.github import Github
+from scrapeomatic.collectors.github import GitHub
 
 
 class TestGitHubScraper(unittest.TestCase):
@@ -10,7 +10,7 @@ class TestGitHubScraper(unittest.TestCase):
     """
 
     def test_basic_call(self):
-        github_scraper = Github()
+        github_scraper = GitHub()
         results = github_scraper.collect("cgivre")
         pprint(results)
         self.assertIsNotNone(results)

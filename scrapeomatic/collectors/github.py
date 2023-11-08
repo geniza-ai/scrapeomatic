@@ -5,7 +5,7 @@ from scrapeomatic.collector import Collector
 from scrapeomatic.utils.constants import GITHUB_BASE_URL
 
 
-class Github(Collector):
+class GitHub(Collector):
 
     def __init__(self, timeout=5, proxy=None):
         super().__init__(timeout, proxy)
@@ -16,7 +16,7 @@ class Github(Collector):
         """
         Collects information about a given user's Github account
         :param username:
-        :return:
+        :return: A dict of a user's GitHub account.
         """
         headers = {}
         response = self.make_request(url=f"{GITHUB_BASE_URL}/{username}", headers=headers)
@@ -36,17 +36,20 @@ class Github(Collector):
         user_data['location'] = soup.find(itemprop="homeLocation").get_text().strip()
         user_data['url'] = soup.find(itemprop="url").get_text().strip()
 
-        # Github allows multiple social media accounts
+        # GitHub allows multiple social media accounts
         user_data['social'] = {}
         social_data = soup.findAll(itemprop="social")
         for account in social_data:
-            account_parts = Github.__get_social_media_accounts(account.get_text())
+            account_parts = GitHub.__get_social_media_accounts(account.get_text())
             user_data['social'][account_parts['platform']] = account_parts['username']
 
         return user_data
 
     @staticmethod
     def __get_social_media_accounts(raw_info: str) -> dict:
+        """
+        This method extracts the various social media accounts a user may have on their github account.
+        """
         parts = raw_info.rstrip().lstrip().split()
 
         # Remove empty elements
@@ -76,8 +79,3 @@ class Github(Collector):
             "contributions": contributions.text.split(" ")[0] if type(contributions) is not str else ""
         }
         """
-
-
-if __name__ == '__main__':
-    github = Github()
-    github.collect("cgivre")
