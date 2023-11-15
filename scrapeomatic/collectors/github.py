@@ -44,6 +44,10 @@ class GitHub(Collector):
             account_parts = GitHub.__get_social_media_accounts(account.get_text())
             user_data['social'][account_parts['platform']] = account_parts['username']
 
+        # Get pinned items
+        raw_pinned_items = soup.find_all(class_="pinned-item-list-item-content")
+        user_data['pinned_items'] = GitHub.__get_pinned_items(raw_pinned_items)
+
         return user_data
 
     @staticmethod
@@ -57,6 +61,31 @@ class GitHub(Collector):
         parts = list(filter(None, parts))
         result = {'platform': parts[0].strip(), 'username': parts[1].strip()}
         return result
+
+    @staticmethod
+    def __get_pinned_items(raw_pinned_items) -> list:
+        pinned_items = []
+        for item in raw_pinned_items:
+            pinned_item = {}
+            pinned_item['title'] = item.find(class_="repo").get_text().strip()
+            if item.find(class_="pinned-item-desc color-fg-muted text-small mt-2 mb-0"):
+                pinned_item['description'] = item.find(class_="pinned-item-desc color-fg-muted text-small mt-2 mb-0").get_text().strip()
+            if item.find(itemprop="programmingLanguage"):
+                pinned_item['programming_language'] = item.find(itemprop="programmingLanguage").get_text().strip()
+
+            counter = 0
+            # Get stars and forks
+            for popularity in item.find_all(class_="pinned-item-meta Link--muted"):
+                if counter == 0:
+                    pinned_item['stars'] = popularity.get_text().strip()
+                    counter += 1
+                else:
+                    pinned_item['forks'] = popularity.get_text().strip()
+                    counter = 0
+
+            pinned_items.append(pinned_item)
+        return pinned_items
+
 
         """
 
