@@ -9,4 +9,4 @@ notes=FIXME,XXX,TODO
 [MASTER]
 extension-pkg-whitelist=pydantic
 
-disable=unnecessary-pass,missing-module-docstring,missing-function-docstring,missing-class-docstring,logging-fstring-interpolation,too-few-public-methods
+disable=unnecessary-pass,missing-module-docstring,missing-function-docstring,missing-class-docstring,logging-fstring-interpolation,too-few-public-methods,use-dict-literal,consider-using-with
