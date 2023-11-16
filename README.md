@@ -31,6 +31,9 @@ github_scraper = GitHub()
 results = github_scraper.collect(user_name)
 ```
 
+**Note:**  GitHub seems to have some security measures in place to prevent scraping email addresses from github repos. At present, we are not able to retrieve the user's email.
+
+
 ## Instagram
 To pull data from Instagram, simply create an Instagram object, then call the `collect(<username>)` method.
 
@@ -70,8 +73,8 @@ The TikTok collector uses Selenium and the Chrome or FireFox extensions.  These 
 Social Media platforms change their interfaces from time to time.  This table reflects when Scrape-O-Matic has last been tested.
 
 | Platform | Last Updated Date |
-|:---------|:-------------------|
-| GitHub | Nov 6, 2023       |
-| Instagram | Nov 6, 2023 |
- | TikTok | Nov 6, 2023 | 
+|:---------|:------------------|
+| GitHub | Nov 15, 2023      |
+| Instagram | Nov 6, 2023       |
+ | TikTok | Nov 6, 2023       | 
 
