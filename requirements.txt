@@ -8,3 +8,5 @@ emoji==2.8.0
 requests~=2.31.0
 configparser~=6.0.0
 pandas
+beautifulsoup4
+lxml

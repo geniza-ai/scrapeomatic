@@ -1,7 +1,8 @@
 DEFAULT_BROWSER = "chrome"
+DEFAULT_TIMEOUT = 5
 
 # Base URLs
-FACEBOOK_BASE_URL = "https://facebook.com"
+GITHUB_BASE_URL = "https://github.com"
 INSTAGRAM_BASE_URL =  "https://www.instagram.com"
 INSTAGRAM_PROFILE_URL = INSTAGRAM_BASE_URL + "/api/v1/users/web_profile_info/"
 TIKTOK_BASE_URL = "https://tiktok.com/@"

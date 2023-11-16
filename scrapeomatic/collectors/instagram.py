@@ -1,14 +1,17 @@
-import requests
+import logging
+
 from fake_headers import Headers
 from requests import HTTPError
 
 from scrapeomatic.collector import Collector
 from scrapeomatic.utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL
 
+logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
 
 class Instagram(Collector):
 
     def __init__(self, timeout=5, proxy=None):
+        super().__init__(timeout, proxy)
         self.proxy = proxy
         self.timeout = timeout
 
@@ -20,19 +23,21 @@ class Instagram(Collector):
         """
         headers = Instagram.__build_headers(username)
         params = Instagram.__build_param(username)
-        response = self.__make_request(url=INSTAGRAM_PROFILE_URL, headers=headers, params=params)
+        response = self.make_request(url=INSTAGRAM_PROFILE_URL, headers=headers, params=params)
         if response.status_code != 200:
             raise HTTPError(f"Error retrieving profile for {username}.  Status Code: {response.status_code}")
+        logging.debug(response.json())
+
         return response.json()['data']['user']
 
     @staticmethod
-    def __build_param(username):
+    def __build_param(username:str) -> dict:
         return {
             'username': username,
         }
 
     @staticmethod
-    def __build_headers(username):
+    def __build_headers(username:str) -> dict:
         return {
             'authority': 'www.instagram.com',
             'accept': '*/*',
@@ -50,13 +55,3 @@ class Instagram(Collector):
             'x-ig-www-claim': '0',
             'x-requested-with': 'XMLHttpRequest',
         }
-
-    def __make_request(self, url, params, headers):
-        if self.proxy:
-            proxy_dict = {
-                'http': f'http://{self.proxy}',
-                'https': f'http://{self.proxy}'
-            }
-            return requests.get(url, headers=headers, timeout=self.timeout, params=params, proxies=proxy_dict)
-
-        return requests.get(url, timeout=self.timeout, headers=headers, params=params)

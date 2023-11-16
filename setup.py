@@ -39,7 +39,7 @@ setup_args = dict(
         'Operating System :: OS Independent',
         'Topic :: Internet'
     ],
-    install_requires=open('requirements.txt').read().splitlines(),
+    install_requires=open('requirements.txt', encoding="utf-8").read().splitlines(),
 )
 
 
