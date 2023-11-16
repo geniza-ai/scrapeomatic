@@ -24,7 +24,7 @@ To pull data from Instagram, simply create an Instagram object, then call the `c
 ### Example Usage
 
 ```python
-from scrapeomatic.collectors.instagram import Instagram
+from src.scrapeomatic.collectors.instagram import Instagram
 
 user_name = "<username>"
 instagram_scraper = Instagram()
@@ -43,7 +43,7 @@ To pull data from TikTok, simply create a TikTok object, then call the `collect(
 ### Example Usage
 
 ```python
-from scrapeomatic.collectors.tiktok import TikTok
+from src.scrapeomatic.collectors.tiktok import TikTok
 
 user_name = "<username>"
 tiktok_scraper = TikTok()

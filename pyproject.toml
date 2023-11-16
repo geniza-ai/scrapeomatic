@@ -1,0 +1,29 @@
+[project]
+name = 'scrapeomatic'
+version = "0.1.1"
+authors = [
+  { name="Charles Givre", email="charles@geniza.ai" },
+]
+description = "Scrape-O-Matic pulls data from popular social media platforms."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+   'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: Apache Software License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: SQL',
+        'Operating System :: OS Independent',
+        'Topic :: Internet'
+]
+
+[project.urls]
+"Homepage" = "https://github.com/geniza-ai/scrapeomatic"
+"Bug Tracker" = "https://github.com/geniza-ai/scrapeomatic/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

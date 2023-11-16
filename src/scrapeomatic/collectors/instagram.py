@@ -2,8 +2,9 @@ import requests
 from fake_headers import Headers
 from requests import HTTPError
 
-from scrapeomatic.collector import Collector
-from scrapeomatic.utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL
+from ..utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL
+
+from .collector import Collector
 
 
 class Instagram(Collector):
