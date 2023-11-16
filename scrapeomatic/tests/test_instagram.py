@@ -15,6 +15,6 @@ class TestInstagramScraper(unittest.TestCase):
         results = instagram_scraper.collect("emmachamberlain")
         self.assertIsNotNone(results)
 
-    def test_bad_browser(self):
+    def test_no_user(self):
         instagram_scraper = Instagram()
         self.assertRaises(HTTPError, instagram_scraper.collect, "asdfjkahsdjkfhaksdfhajsdhfkajdshf")
