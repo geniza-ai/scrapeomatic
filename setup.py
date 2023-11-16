@@ -19,7 +19,7 @@ this_directory = Path(__file__).parent
 setup_args = dict(
     name='scrapeomatic',
     packages=find_packages(include=['scrapeomatic', 'scrapeomatic.*']),
-    version='0.1',
+    version='0.1.1',
     license='Apache-2.0',
     description='',
     author='Charles S. Givre',
