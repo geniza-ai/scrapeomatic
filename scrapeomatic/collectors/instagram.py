@@ -1,9 +1,12 @@
+import logging
+
 from fake_headers import Headers
 from requests import HTTPError
 
 from scrapeomatic.collector import Collector
 from scrapeomatic.utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL
 
+logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
 
 class Instagram(Collector):
 
@@ -23,6 +26,8 @@ class Instagram(Collector):
         response = self.make_request(url=INSTAGRAM_PROFILE_URL, headers=headers, params=params)
         if response.status_code != 200:
             raise HTTPError(f"Error retrieving profile for {username}.  Status Code: {response.status_code}")
+        logging.debug(response.json())
+
         return response.json()['data']['user']
 
     @staticmethod
