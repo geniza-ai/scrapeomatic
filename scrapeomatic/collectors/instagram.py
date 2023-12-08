@@ -4,13 +4,14 @@ from fake_headers import Headers
 from requests import HTTPError
 
 from scrapeomatic.collector import Collector
-from scrapeomatic.utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL
+from scrapeomatic.utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL, DEFAULT_TIMEOUT
 
 logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
 
+
 class Instagram(Collector):
 
-    def __init__(self, timeout=5, proxy=None):
+    def __init__(self, timeout=DEFAULT_TIMEOUT, proxy=None):
         super().__init__(timeout, proxy)
         self.proxy = proxy
         self.timeout = timeout
@@ -25,19 +26,20 @@ class Instagram(Collector):
         params = Instagram.__build_param(username)
         response = self.make_request(url=INSTAGRAM_PROFILE_URL, headers=headers, params=params)
         if response.status_code != 200:
-            raise HTTPError(f"Error retrieving profile for {username}.  Status Code: {response.status_code}")
+            logging.error(f"Error retrieving YouTube profile for {username}.  Status Code: {response.status_code}")
+            raise HTTPError(f"Error retrieving YouTube profile for {username}.  Status Code: {response.status_code}")
         logging.debug(response.json())
 
         return response.json()['data']['user']
 
     @staticmethod
-    def __build_param(username:str) -> dict:
+    def __build_param(username: str) -> dict:
         return {
             'username': username,
         }
 
     @staticmethod
-    def __build_headers(username:str) -> dict:
+    def __build_headers(username: str) -> dict:
         return {
             'authority': 'www.instagram.com',
             'accept': '*/*',
