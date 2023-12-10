@@ -2,12 +2,12 @@ from bs4 import BeautifulSoup
 from requests import HTTPError
 
 from scrapeomatic.collector import Collector
-from scrapeomatic.utils.constants import GITHUB_BASE_URL
+from scrapeomatic.utils.constants import GITHUB_BASE_URL, DEFAULT_TIMEOUT
 
 
 class GitHub(Collector):
 
-    def __init__(self, timeout=5, proxy=None):
+    def __init__(self, timeout=DEFAULT_TIMEOUT, proxy=None):
         super().__init__(timeout, proxy)
         self.proxy = proxy
         self.timeout = timeout

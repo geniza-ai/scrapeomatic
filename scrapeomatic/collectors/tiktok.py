@@ -1,3 +1,5 @@
+import logging
+
 import emoji
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -12,6 +14,8 @@ from webdriver_manager.firefox import GeckoDriverManager
 
 from scrapeomatic.collector import Collector
 from scrapeomatic.utils.constants import DEFAULT_BROWSER, TIKTOK_BASE_URL, DEFAULT_TIMEOUT
+
+logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
 
 
 class TikTok(Collector):
