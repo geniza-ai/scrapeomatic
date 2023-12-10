@@ -12,6 +12,10 @@ from scrapeomatic.utils.constants import DEFAULT_TIMEOUT, YOUTUBE_BASE_URL, DEFA
 
 
 class YouTube(Collector):
+    """
+    This class allows you to collect metadata about a YouTube account.
+    """
+
     __type_property_map = {
         "videos": "videoRenderer",
         "streams": "videoRenderer",
@@ -63,7 +67,7 @@ class YouTube(Collector):
         for video in channel_data:
             videos.append(video)
 
-        user_data['videos'] = video
+        user_data['videos'] = videos
         return user_data
 
     def get_channel(self, channel_username: str = None,
@@ -108,27 +112,6 @@ class YouTube(Collector):
         videos = self.get_videos(url, api_endpoint, YouTube.__type_property_map[content_type], limit, sleep, sort_by)
         for video in videos:
             yield video
-
-    def __get_video(self, video_id: str) -> dict:
-        """Gets a single video.
-
-        Parameters:
-            video_id (``str``):
-                The video id from the video you want to get.
-        """
-
-        session = YouTube.__get_session()
-        url = f"https://www.youtube.com/watch?v={video_id}"
-        html = YouTube.__get_initial_data(session, url)
-        client = json.loads(
-            YouTube.__get_json_from_html(html, "INNERTUBE_CONTEXT", 2, '"}},') + '"}}'
-        )["client"]
-        session.headers["X-YouTube-Client-Name"] = "1"
-        session.headers["X-YouTube-Client-Version"] = client["clientVersion"]
-        data = json.loads(
-            YouTube.__get_json_from_html(html, "var ytInitialData = ", 0, "};") + "}"
-        )
-        return next(self.__search_dict(data, "videoPrimaryInfoRenderer"))
 
     def get_videos(self, url: str, api_endpoint: str, selector: str, limit: int, sleep: float, sort_by: str = None
                    ) -> Generator[dict, None, None]:
@@ -266,20 +249,26 @@ class YouTube(Collector):
         return int(subscriber_count)
 
     @staticmethod
-    def __value_to_int(x: str) -> int:
+    def __value_to_int(num: str) -> int:
         """
         This function converts numbers formatted for display into ints.
         """
-        if isinstance(x, float) or isinstance(x, int):
-            return x
-        if 'K' in x:
-            if len(x) > 1:
-                return int(float(x.replace('K', '')) * 1000)
-            return 1000
-        if 'M' in x:
-            if len(x) > 1:
-                return int(float(x.replace('M', '')) * 1000000)
-            return 1000000
-        if 'B' in x:
-            return int(float(x.replace('B', '')) * 1000000000)
-        return int(x)
+        result = 0
+        if isinstance(num, (float, int)):
+            result = int(num)
+        elif 'K' in num:
+            if len(num) > 1:
+                result = int(float(num.replace('K', '')) * 1000)
+            else:
+                result = 1000
+        elif 'M' in num:
+            if len(num) > 1:
+                result = int(float(num.replace('M', '')) * 1000000)
+            else:
+                result = 1000000
+        elif 'B' in num:
+            if len(num) > 1:
+                result = int(float(num.replace('B', '')) * 1000000000)
+            else:
+                result = 1000000000
+        return result
