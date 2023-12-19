@@ -1,4 +1,6 @@
 import abc
+from functools import lru_cache
+
 import pandas as pd
 import requests
 
@@ -29,6 +31,7 @@ class Collector(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
+    @lru_cache
     def collect_to_dataframe(self, username: str) -> pd.DataFrame:
         """
         Returns a pandas dataframe of the target user.

@@ -1,4 +1,5 @@
 import logging
+from functools import lru_cache
 
 from fake_headers import Headers
 from requests import HTTPError
@@ -16,6 +17,7 @@ class Instagram(Collector):
         self.proxy = proxy
         self.timeout = timeout
 
+    @lru_cache
     def collect(self, username: str) -> dict:
         """
         Collects information about a given user's Instagram
@@ -39,6 +41,7 @@ class Instagram(Collector):
         }
 
     @staticmethod
+    @lru_cache
     def __build_headers(username: str) -> dict:
         return {
             'authority': 'www.instagram.com',

@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from bs4 import BeautifulSoup
 from requests import HTTPError
 
@@ -12,6 +14,7 @@ class GitHub(Collector):
         self.proxy = proxy
         self.timeout = timeout
 
+    @lru_cache
     def collect(self, username: str) -> dict:
         """
         Collects information about a given user's Github account
@@ -51,6 +54,7 @@ class GitHub(Collector):
         return user_data
 
     @staticmethod
+    @lru_cache
     def __get_social_media_accounts(raw_info: str) -> dict:
         """
         This method extracts the various social media accounts a user may have on their github account.
@@ -63,6 +67,7 @@ class GitHub(Collector):
         return result
 
     @staticmethod
+    @lru_cache
     def __get_pinned_items(raw_pinned_items) -> list:
         pinned_items = []
         for item in raw_pinned_items:

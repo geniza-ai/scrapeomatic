@@ -1,5 +1,6 @@
 import json
 import time
+from functools import lru_cache
 from typing import Generator, Literal
 
 import requests
@@ -31,6 +32,7 @@ class YouTube(Collector):
         self.session.headers["User-Agent"] = DEFAULT_USER_AGENT
         self.session.headers["Accept-Language"] = "en"
 
+    @lru_cache
     def collect(self, username: str) -> dict:
         """
         Collects information about a given user's Github account
@@ -70,6 +72,7 @@ class YouTube(Collector):
         user_data['videos'] = videos
         return user_data
 
+    @lru_cache
     def get_channel(self, channel_username: str = None,
                     limit: int = None,
                     sleep: float = 1,
@@ -113,6 +116,7 @@ class YouTube(Collector):
         for video in videos:
             yield video
 
+    @lru_cache
     def get_videos(self, url: str, api_endpoint: str, selector: str, limit: int, sleep: float, sort_by: str = None
                    ) -> Generator[dict, None, None]:
         session = YouTube.__get_session()
@@ -249,6 +253,7 @@ class YouTube(Collector):
         return int(subscriber_count)
 
     @staticmethod
+    @lru_cache
     def __value_to_int(num: str) -> int:
         """
         This function converts numbers formatted for display into ints.
