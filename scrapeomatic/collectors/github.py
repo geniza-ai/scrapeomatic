@@ -67,7 +67,6 @@ class GitHub(Collector):
         return result
 
     @staticmethod
-    @lru_cache
     def __get_pinned_items(raw_pinned_items) -> list:
         pinned_items = []
         for item in raw_pinned_items:
