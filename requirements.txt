@@ -10,4 +10,5 @@ configparser~=6.0.0
 pandas
 beautifulsoup4
 lxml
-requests_html
+requests-html
+chromedriver-py
