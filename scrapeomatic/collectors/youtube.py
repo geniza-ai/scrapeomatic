@@ -1,15 +1,32 @@
+import functools
 import json
 import time
 from functools import lru_cache
 from typing import Generator, Literal
 
+import asyncio
 import requests
 from bs4 import BeautifulSoup
 from requests import HTTPError
-from requests_html import HTMLSession
+from requests_html import AsyncHTMLSession
 
 from scrapeomatic.collector import Collector
 from scrapeomatic.utils.constants import DEFAULT_TIMEOUT, YOUTUBE_BASE_URL, DEFAULT_VIDEO_LIMIT, DEFAULT_USER_AGENT
+
+
+def force_sync(async_function_name):
+    '''
+    turn an async function to sync function
+    '''
+
+    @functools.wraps(async_function_name)
+    def wrapper(*args, **kwargs):
+        res = async_function_name(*args, **kwargs)
+        if asyncio.iscoroutine(res):
+            return asyncio.get_event_loop().run_until_complete(res)
+        return res
+
+    return wrapper
 
 
 class YouTube(Collector):
@@ -28,7 +45,7 @@ class YouTube(Collector):
         self.proxy = proxy
         self.timeout = timeout
         self.video_limit = video_limit
-        self.session = HTMLSession()
+        self.session = AsyncHTMLSession()
         self.session.headers["User-Agent"] = DEFAULT_USER_AGENT
         self.session.headers["Accept-Language"] = "en"
 
@@ -39,15 +56,27 @@ class YouTube(Collector):
         :param username:
         :return: A dict of a user's GitHub account.
         """
+        @force_sync
+        async def force_collect_async():
+            result = await self.collect_async(username)
+            return result
+        return force_collect_async()
+
+    async def collect_async(self, username: str) -> dict:
+        """
+        Collects information about a given user's Github account
+        :param username:
+        :return: A dict of a user's GitHub account.
+        """
 
         headers = {}
-        response = self.session.get(f"{YOUTUBE_BASE_URL}{username}", headers=headers)
+        response = await self.session.get(f"{YOUTUBE_BASE_URL}{username}", headers=headers)
 
         if response.status_code != 200:
             raise HTTPError(f"Error retrieving profile for {username}.  Status Code: {response.status_code}")
 
         # Execute the javascript
-        response.html.render(sleep=1)
+        await response.html.arender(sleep=1)
         user_data = {}
 
         # Now parse the incoming data
@@ -125,13 +154,13 @@ class YouTube(Collector):
         count = 0
         while True:
             if is_first:
-                html = self.__get_initial_data(self.session, url)
+                html = self.__get_initial_data(session, url)
                 client = json.loads(
                     YouTube.__get_json_from_html(html, "INNERTUBE_CONTEXT", 2, '"}},') + '"}}'
                 )["client"]
                 api_key = YouTube.__get_json_from_html(html, "innertubeApiKey", 3)
-                self.session.headers["X-YouTube-Client-Name"] = "1"
-                self.session.headers["X-YouTube-Client-Version"] = client["clientVersion"]
+                session.headers["X-YouTube-Client-Name"] = "1"
+                session.headers["X-YouTube-Client-Version"] = client["clientVersion"]
                 data = json.loads(
                     YouTube.__get_json_from_html(html, "var ytInitialData = ", 0, "};") + "}"
                 )
@@ -140,7 +169,7 @@ class YouTube(Collector):
                 if sort_by and sort_by != "newest":
                     continue
             else:
-                data = self.__get_ajax_data(self.session, api_endpoint, api_key, next_data, client)
+                data = self.__get_ajax_data(session, api_endpoint, api_key, next_data, client)
                 next_data = YouTube.__get_next_data(data)
             for result in self.__get_videos_items(data, selector):
                 try:
