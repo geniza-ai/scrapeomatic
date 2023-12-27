@@ -20,8 +20,8 @@ logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(messag
 
 class TikTok(Collector):
 
-    def __init__(self, browser_name=None, proxy=None):
-        super().__init__(DEFAULT_TIMEOUT, proxy)
+    def __init__(self, browser_name=None, proxy=None, cert_path=None):
+        super().__init__(DEFAULT_TIMEOUT, proxy, cert_path)
         # Initialize the driver.  Default to chrome
         self.hashtags = {}
         self.proxy = proxy

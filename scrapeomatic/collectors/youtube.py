@@ -14,9 +14,10 @@ class YouTube(Collector):
     This class allows you to collect metadata about a YouTube account.
     """
 
-    def __init__(self, video_limit: int = DEFAULT_VIDEO_LIMIT, timeout: int = DEFAULT_TIMEOUT, proxy=None):
-        super().__init__(timeout, proxy)
+    def __init__(self, video_limit: int = DEFAULT_VIDEO_LIMIT, timeout: int = DEFAULT_TIMEOUT, proxy=None, cert_path=None):
+        super().__init__(timeout, proxy, cert_path)
         self.proxy = proxy
+        self.cert_path = cert_path
         self.timeout = timeout
         self.video_limit = video_limit
         self.session = HTMLSession()
