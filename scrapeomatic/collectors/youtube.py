@@ -53,6 +53,7 @@ class YouTube(Collector):
         user_data['description'] = soup.find("meta", itemprop="description")['content']
 
         videos = self.get_channel(username)
+        self.session.close()
         video_list = []
         for video in videos:
             video_list.append(video)
