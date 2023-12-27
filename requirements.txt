@@ -12,3 +12,4 @@ beautifulsoup4
 lxml
 requests-html
 chromedriver-py
+scrapetube
