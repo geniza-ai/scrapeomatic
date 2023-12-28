@@ -31,15 +31,15 @@ class Instagram(Collector):
         if response.status_code != 200:
             logging.error(f"Error retrieving Instagram profile for {username}.  Status Code: {response.status_code}")
             raise HTTPError(f"Error retrieving Instagram profile for {username}.  Status Code: {response.status_code}")
-        elif len(response.text) == 0:
-            raise HTTPError(f"Empty response from Instagram. Your IP may be blocked or the profile you are trying to access maybe private.")
+
+        if len(response.text) == 0:
+            raise HTTPError("Empty response from Instagram. Your IP may be blocked or the profile you are trying to access maybe private.")
         try:
-            logging.debug(response.json())
             return response.json()['data']['user']
         except JSONDecodeError as exc:
             error_message = f"Error parsing Instagram profile. Your IP could be blocked or the profile could be private. Response was: {response.text}. {exc}"
             logging.error(error_message)
-            raise HTTPError(error_message)
+            raise HTTPError(error_message) from exc
 
     @staticmethod
     def __build_param(username: str) -> dict:
