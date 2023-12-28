@@ -10,7 +10,8 @@ IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 class TestInstagramScraper(unittest.TestCase):
     """
-    This class tests the Instagram scraper.
+    This class tests the Instagram scraper.  Be sure to run these tests locally as they do not work
+    on GitHub actions.
     """
 
     @unittest.skipIf(IN_GITHUB_ACTIONS, "Instagram tests fail on GitHub Actions.")
