@@ -3,7 +3,7 @@ from functools import lru_cache
 import scrapetube
 from bs4 import BeautifulSoup
 from requests import HTTPError
-from requests_html import HTMLSession
+from requests_html_playwright.requests_html import HTMLSession
 
 from scrapeomatic.collector import Collector
 from scrapeomatic.utils.constants import DEFAULT_VIDEO_LIMIT, DEFAULT_TIMEOUT, DEFAULT_USER_AGENT, YOUTUBE_BASE_URL
@@ -14,10 +14,11 @@ class YouTube(Collector):
     This class allows you to collect metadata about a YouTube account.
     """
 
-    def __init__(self, video_limit: int = DEFAULT_VIDEO_LIMIT, timeout: int = DEFAULT_TIMEOUT, proxy=None, cert_path=None):
-        super().__init__(timeout, proxy, cert_path)
+    def __init__(self, video_limit: int = DEFAULT_VIDEO_LIMIT,
+                 timeout: int = DEFAULT_TIMEOUT,
+                 proxy=None, cert_path: str = None):
+        super().__init__(timeout, proxy, cert_path=cert_path)
         self.proxy = proxy
-        self.cert_path = cert_path
         self.timeout = timeout
         self.video_limit = video_limit
         self.session = HTMLSession()
@@ -30,36 +31,50 @@ class YouTube(Collector):
         :param username:
         :return: A dict of a user's YouTube account.
         """
+        user_data = {}
+
+        session = HTMLSession()
+        session.headers["User-Agent"] = DEFAULT_USER_AGENT
+        session.headers["Accept-Language"] = "en"
+
         headers = {}
-        response = self.session.get(f"{YOUTUBE_BASE_URL}{username}", headers=headers)
+        response = session.get(f"{YOUTUBE_BASE_URL}{username}", headers=headers)
 
         if response.status_code != 200:
             raise HTTPError(f"Error retrieving profile for {username}.  Status Code: {response.status_code}")
+
         # Execute the javascript
-        response.html.render(sleep=1)
-        user_data = {}
+        response.html.render()
 
         # Now parse the incoming data
         soup = BeautifulSoup(response.html.html, "html.parser")
-        user_data['username'] = soup.find(id='channel-handle').text
 
-        user_data['channel_name'] = soup.find(class_="style-scope ytd-channel-name").text.strip()
+        user_data['username'] = username
 
-        subscriber_count = YouTube.__parse_subscriber_count(soup.find(id='subscriber-count').text)
-        user_data['subscriber_count'] = subscriber_count
+        if soup.find(class_="style-scope ytd-channel-name"):
+            user_data['channel_name'] = soup.find(class_="style-scope ytd-channel-name").text.strip()
 
-        video_count = YouTube.__parse_subscriber_count(soup.find(id='videos-count').text)
-        user_data['video_count'] = video_count
+        if soup.find(id='subscriber-count'):
+            subscriber_count = YouTube.__parse_subscriber_count(soup.find(id='subscriber-count').text)
+            user_data['subscriber_count'] = subscriber_count
 
-        user_data['description'] = soup.find("meta", itemprop="description")['content']
+        if soup.find(id='videos-count'):
+            video_count = YouTube.__parse_subscriber_count(soup.find(id='videos-count').text)
+            user_data['video_count'] = video_count
+
+        if soup.find("meta", itemprop="description"):
+            user_data['description'] = soup.find("meta", itemprop="description")['content']
 
         videos = self.get_channel(username)
-        self.session.close()
+
         video_list = []
         for video in videos:
             video_list.append(video)
 
         user_data['videos'] = video_list
+
+        # Don't forget to tidy up.
+        session.close()
         return user_data
 
     def get_channel(self, channel_username: str):

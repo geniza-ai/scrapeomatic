@@ -10,6 +10,6 @@ configparser~=6.0.0
 pandas
 beautifulsoup4
 lxml
-requests-html
+requests-html-playwright~=0.11.2
 chromedriver-py
 scrapetube
