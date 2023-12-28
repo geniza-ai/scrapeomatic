@@ -50,15 +50,20 @@ class YouTube(Collector):
         soup = BeautifulSoup(response.html.html, "html.parser")
 
         user_data['username'] = username
-        user_data['channel_name'] = soup.find(class_="style-scope ytd-channel-name").text.strip()
 
-        subscriber_count = YouTube.__parse_subscriber_count(soup.find(id='subscriber-count').text)
-        user_data['subscriber_count'] = subscriber_count
+        if soup.find(class_="style-scope ytd-channel-name"):
+            user_data['channel_name'] = soup.find(class_="style-scope ytd-channel-name").text.strip()
 
-        video_count = YouTube.__parse_subscriber_count(soup.find(id='videos-count').text)
-        user_data['video_count'] = video_count
+        if soup.find(id='subscriber-count'):
+            subscriber_count = YouTube.__parse_subscriber_count(soup.find(id='subscriber-count').text)
+            user_data['subscriber_count'] = subscriber_count
 
-        user_data['description'] = soup.find("meta", itemprop="description")['content']
+        if soup.find(id='videos-count'):
+            video_count = YouTube.__parse_subscriber_count(soup.find(id='videos-count').text)
+            user_data['video_count'] = video_count
+
+        if soup.find("meta", itemprop="description"):
+            user_data['description'] = soup.find("meta", itemprop="description")['content']
 
         videos = self.get_channel(username)
 
