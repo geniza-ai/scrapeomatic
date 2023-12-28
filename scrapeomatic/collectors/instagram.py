@@ -12,9 +12,10 @@ logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(messag
 
 class Instagram(Collector):
 
-    def __init__(self, timeout=DEFAULT_TIMEOUT, proxy=None):
-        super().__init__(timeout, proxy)
+    def __init__(self, timeout=DEFAULT_TIMEOUT, proxy=None, cert_path=None):
+        super().__init__(timeout, proxy, cert_path)
         self.proxy = proxy
+        self.cert_path = cert_path
         self.timeout = timeout
 
     @lru_cache
