@@ -2,7 +2,7 @@ import logging
 from functools import lru_cache
 
 from fake_headers import Headers
-from requests import HTTPError
+from requests import HTTPError, JSONDecodeError
 
 from scrapeomatic.collector import Collector
 from scrapeomatic.utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL, DEFAULT_TIMEOUT
@@ -21,19 +21,25 @@ class Instagram(Collector):
     @lru_cache
     def collect(self, username: str) -> dict:
         """
-        Collects information about a given user's Instagram
-        :param username:
-        :return:
+        Collects information about a given user's Instagram account.  Note that the account must be public.
+        :param username: The Instagram username you want to explore.
+        :return:  A dictionary of metadata about the Instagram profile.
         """
         headers = Instagram.__build_headers(username)
         params = Instagram.__build_param(username)
         response = self.make_request(url=INSTAGRAM_PROFILE_URL, headers=headers, params=params)
         if response.status_code != 200:
-            logging.error(f"Error retrieving YouTube profile for {username}.  Status Code: {response.status_code}")
-            raise HTTPError(f"Error retrieving YouTube profile for {username}.  Status Code: {response.status_code}")
-        logging.debug(response.json())
-
-        return response.json()['data']['user']
+            logging.error(f"Error retrieving Instagram profile for {username}.  Status Code: {response.status_code}")
+            raise HTTPError(f"Error retrieving Instagram profile for {username}.  Status Code: {response.status_code}")
+        elif len(response.text) == 0:
+            raise HTTPError(f"Empty response from Instagram. Your IP may be blocked or the profile you are trying to access maybe private.")
+        try:
+            logging.debug(response.json())
+            return response.json()['data']['user']
+        except JSONDecodeError as exc:
+            error_message = f"Error parsing Instagram profile. Your IP could be blocked or the profile could be private. Response was: {response.text}. {exc}"
+            logging.error(error_message)
+            raise HTTPError(error_message)
 
     @staticmethod
     def __build_param(username: str) -> dict:

@@ -26,7 +26,7 @@ setup_args = dict(
     author='Charles S. Givre',
     author_email='charles@geniza.ai',
     url='https://github.com/geniza-ai/scrapomatic',
-    long_description = (this_directory / "README.md").read_text(encoding='utf-8'),
+    long_description = (this_directory / "README.rst").read_text(encoding='utf-8'),
     long_description_content_type="text/markdown",
     classifiers=[
         'Development Status :: 4 - Beta',
