@@ -49,7 +49,7 @@ class YouTube(Collector):
         # Now parse the incoming data
         soup = BeautifulSoup(response.html.html, "html.parser")
 
-        user_data['username'] = soup.find(id='channel-handle').text
+        user_data['username'] = username
         user_data['channel_name'] = soup.find(class_="style-scope ytd-channel-name").text.strip()
 
         subscriber_count = YouTube.__parse_subscriber_count(soup.find(id='subscriber-count').text)
