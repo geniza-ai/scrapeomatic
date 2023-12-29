@@ -1,12 +1,13 @@
 from functools import lru_cache
 
 import scrapetube
+import ua_generator
 from bs4 import BeautifulSoup
 from requests import HTTPError
 from requests_html_playwright.requests_html import HTMLSession
 
 from scrapeomatic.collector import Collector
-from scrapeomatic.utils.constants import DEFAULT_VIDEO_LIMIT, DEFAULT_TIMEOUT, DEFAULT_USER_AGENT, YOUTUBE_BASE_URL
+from scrapeomatic.utils.constants import DEFAULT_VIDEO_LIMIT, DEFAULT_TIMEOUT, YOUTUBE_BASE_URL
 
 
 class YouTube(Collector):
@@ -21,8 +22,9 @@ class YouTube(Collector):
         self.proxy = proxy
         self.timeout = timeout
         self.video_limit = video_limit
+        self.user_agent = ua_generator.generate()
         self.session = HTMLSession()
-        self.session.headers["User-Agent"] = DEFAULT_USER_AGENT
+        self.session.headers["User-Agent"] = self.user_agent.text
         self.session.headers["Accept-Language"] = "en"
 
     def collect(self, username: str) -> dict:
@@ -34,7 +36,7 @@ class YouTube(Collector):
         user_data = {}
 
         session = HTMLSession()
-        session.headers["User-Agent"] = DEFAULT_USER_AGENT
+        session.headers["User-Agent"] = self.user_agent.text
         session.headers["Accept-Language"] = "en"
 
         headers = {}

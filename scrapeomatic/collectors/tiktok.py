@@ -1,6 +1,7 @@
 import logging
 
 import emoji
+import ua_generator
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
@@ -8,7 +9,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.support import expected_conditions
-from fake_headers import Headers
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
@@ -95,7 +95,7 @@ class TikTok(Collector):
 
     @staticmethod
     def __set_properties(browser_option):
-        user_agent = Headers().generate()
+        user_agent = ua_generator.generate()
         browser_option.add_argument('--headless')
         browser_option.add_argument('--disable-extensions')
         browser_option.add_argument('--incognito')
@@ -103,7 +103,7 @@ class TikTok(Collector):
         browser_option.add_argument("--disable-dev-shm-usage")
         browser_option.add_argument('--disable-gpu')
         browser_option.add_argument('--log-level=3')
-        browser_option.add_argument(f'user-agent={user_agent}')
+        browser_option.add_argument(f'user-agent={user_agent.text}')
         browser_option.add_argument('--disable-notifications')
         browser_option.add_argument('--disable-popup-blocking')
 

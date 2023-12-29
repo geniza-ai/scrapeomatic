@@ -1,7 +1,7 @@
 import logging
 from functools import lru_cache
 
-from fake_headers import Headers
+import ua_generator
 from requests import HTTPError, JSONDecodeError
 
 from scrapeomatic.collector import Collector
@@ -50,17 +50,18 @@ class Instagram(Collector):
     @staticmethod
     @lru_cache
     def __build_headers(username: str) -> dict:
+        ua = ua_generator.generate()
         return {
             'authority': 'www.instagram.com',
             'accept': '*/*',
             'accept-language': 'en-US,en;q=0.9',
             'referer': f"{INSTAGRAM_BASE_URL}/{username}/",
             'sec-ch-prefers-color-scheme': 'dark',
-            'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Microsoft Edge";v="108"',
+            'sec-ch-ua': ua.ch.brands,
             'sec-fetch-dest': 'empty',
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'same-origin',
-            'user-agent': Headers().generate()['User-Agent'],
+            'user-agent': ua.text,
             'x-asbd-id': '198387',
             'x-csrftoken': 'VUm8uVUz0h2Y2CO1SwGgVAG3jQixNBmg',
             'x-ig-app-id': '936619743392459',
