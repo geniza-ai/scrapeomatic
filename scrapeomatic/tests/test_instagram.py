@@ -24,3 +24,8 @@ class TestInstagramScraper(unittest.TestCase):
     def test_no_user(self):
         instagram_scraper = Instagram()
         self.assertRaises(HTTPError, instagram_scraper.collect, "asdfjkahsdjkfhaksdfhajsdhfkajdshf")
+
+    def test_get_post(self):
+        instagram_scraper = Instagram()
+        instagram_scraper.get_post_metrics("BOTU6rJhShv")
+

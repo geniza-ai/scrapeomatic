@@ -82,6 +82,10 @@ youtube_scraper = YouTube()
 results = youtube_scraper.collect(account)
 ```
 
+### Additional Methods:
+The YouTube collector also features:
+
+* `get_video(<video id>)`:  Returns metadata about a specific video.  The video ID you will need can be found in the YouTube URL for the video. For example: `https://www.youtube.com/watch?v=6YgYXHrDiuk`, the video id would be `6YgYXHrDiuk`.
 
 # Updates
 Social Media platforms change their interfaces from time to time.  This table reflects when Scrape-O-Matic has last been tested.

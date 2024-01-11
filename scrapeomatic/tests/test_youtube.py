@@ -18,3 +18,8 @@ class TestYouTubeScraper(unittest.TestCase):
     def test_no_user(self):
         youtube_scraper = YouTube()
         self.assertRaises(HTTPError, youtube_scraper.collect, "asdfjkahsdjkfhaksdfhajsdhfkajdshf")
+
+    def test_video(self):
+        youtube_scraper = YouTube()
+        results = youtube_scraper.get_video("6YgYXHrDiuk")
+        self.assertIsNotNone(results)

@@ -8,5 +8,6 @@ DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKi
 GITHUB_BASE_URL = "https://github.com"
 INSTAGRAM_BASE_URL =  "https://www.instagram.com"
 INSTAGRAM_PROFILE_URL = INSTAGRAM_BASE_URL + "/api/v1/users/web_profile_info/"
+INSTAGRAM_VIDEO_URL = f"{INSTAGRAM_BASE_URL}/p"
 TIKTOK_BASE_URL = "https://tiktok.com/@"
 YOUTUBE_BASE_URL = "https://www.youtube.com/@"

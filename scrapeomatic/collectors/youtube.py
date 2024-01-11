@@ -27,6 +27,7 @@ class YouTube(Collector):
         self.session.headers["User-Agent"] = self.user_agent.text
         self.session.headers["Accept-Language"] = "en"
 
+    @lru_cache()
     def collect(self, username: str) -> dict:
         """
         Collects information about a given user's Github account
@@ -79,10 +80,24 @@ class YouTube(Collector):
         session.close()
         return user_data
 
-    def get_channel(self, channel_username: str):
+    @lru_cache()
+    def get_channel(self, channel_username: str) -> dict:
         return scrapetube.get_channel(channel_username=channel_username,
                                       limit=self.video_limit
                                       )
+
+    @lru_cache()
+    def get_video(self, video_id: str) -> dict:
+        """
+        Gets the metadata for a particular video.
+        Args:
+            video_id: The google id for the video.
+
+        Returns:
+
+        """
+        return scrapetube.scrapetube.get_video(video_id)
+
 
     @staticmethod
     def __parse_subscriber_count(count_value: str) -> int:

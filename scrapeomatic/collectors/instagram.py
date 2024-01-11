@@ -1,11 +1,13 @@
+import json
 import logging
 from functools import lru_cache
 
 import ua_generator
+from bs4 import BeautifulSoup
 from requests import HTTPError, JSONDecodeError
 
 from scrapeomatic.collector import Collector
-from scrapeomatic.utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL, DEFAULT_TIMEOUT
+from scrapeomatic.utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL, DEFAULT_TIMEOUT, INSTAGRAM_VIDEO_URL
 
 logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
 
@@ -40,6 +42,19 @@ class Instagram(Collector):
             error_message = f"Error parsing Instagram profile. Your IP could be blocked or the profile could be private. Response was: {response.text}. {exc}"
             logging.error(error_message)
             raise HTTPError(error_message) from exc
+
+    @lru_cache
+    def get_post_metrics(self, post_id: str) -> dict:
+        headers = {}
+        final_url = f"{INSTAGRAM_VIDEO_URL}/{post_id}?__a=1&__d=dis"
+        print(final_url)
+        response = self.make_request(url=final_url)
+
+        soup = BeautifulSoup(response.text, "html5lib")
+        body = soup.find('body', {'class': ''})
+        script = body.find('script', {'type': 'text/javascript'})
+        data = json.loads(script.text.replace('window._sharedData = ', '')[:-1])
+        print(data)
 
     @staticmethod
     def __build_param(username: str) -> dict:
