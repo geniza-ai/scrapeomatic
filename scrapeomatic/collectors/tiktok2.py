@@ -1,7 +1,9 @@
 import json
 import logging
+from time import time
 from json import JSONDecodeError
 from pprint import pprint
+from urllib.parse import urlencode
 
 import emoji
 from bs4 import BeautifulSoup
@@ -10,6 +12,7 @@ import ua_generator
 
 from scrapeomatic.collector import Collector
 from scrapeomatic.utils.constants import DEFAULT_TIMEOUT, TIKTOK_BASE_URL
+from scrapeomatic.utils.tiktok.xbogus import Signer
 
 logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
 HEADERS = {'Accept-Encoding': 'gzip, deflate, sdch',
@@ -24,7 +27,7 @@ HEADERS = {'Accept-Encoding': 'gzip, deflate, sdch',
 class TikTok2(Collector):
 
     def __init__(self, proxy=None, cert_path=None):
-        super().__init__(DEFAULT_TIMEOUT, proxy, cert_path)
+        super().__init__(DEFAULT_TIMEOUT, proxy, cert_path, True)
 
     def collect(self, username: str) -> dict:
         """
@@ -33,18 +36,18 @@ class TikTok2(Collector):
         :return: A dict of the user's account information.
         """
 
-        if username.startswith('@'):
-            final_url = f"{TIKTOK_BASE_URL}{username}"
-        else:
-            final_url = f"{TIKTOK_BASE_URL}{username}"
+        final_url = f"{TIKTOK_BASE_URL}/@{username}"
 
-        headers = {}
         response = self.make_request(url=final_url, headers=HEADERS)
         if response.status_code != 200:
             raise HTTPError(f"Error retrieving profile for {username}.  Status Code: {response.status_code}")
 
         # Now parse the incoming data
         soup = BeautifulSoup(response.text, "html5lib")
+
+        f = open("tiktok.html", "w")
+        f.write(response.text)
+        f.close()
 
         # The user info is contained in a large JS object
         tt_script = soup.find('script', attrs={'id': "__UNIVERSAL_DATA_FOR_REHYDRATION__"})
@@ -55,6 +58,9 @@ class TikTok2(Collector):
 
         user_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['user']
         stats_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['stats']
+
+        videos = self.get_videos(username, user_data['secUid'])
+
         profile_data = {
             'sec_id': user_data['secUid'],
             'id': user_data['id'],
@@ -77,7 +83,66 @@ class TikTok2(Collector):
         }
 
         pprint(profile_data)
-        return {}
+        return profile_data
+
+    def get_videos(self, username: str, secUid: str) -> list:
+        user_agent = ua_generator.generate()
+        video_headers = {
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Connection': 'keep-alive',
+            'Host': 'www.tiktok.com',
+            'Referer': f"{TIKTOK_BASE_URL}/@{username}",
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Dest': 'empty',
+            'User-Agent': user_agent.text
+        }
+
+        query_params = {
+            'aid': 1988,
+            'app_language': 'en',
+            'app_name': 'tiktok_web',
+            'browser_language': 'en-US',
+            'browser_name': 'Mozilla',
+            'browser_online': True,
+            'browser_platform': user_agent.platform,
+            'browser_version': user_agent.browser_version,
+            'channel': 'tiktok_web',
+            'cookie_enabled': True,
+            'count': 35,
+            'coverFormat': 0,
+            'cursor': 0,
+            'device_id': '7280579273231795755',  # TODO Fix ME
+            'device_platform': 'web_pc',
+            'focus_state': True,
+            'from_page': 'user',
+            'priority_region': '',
+            'referer': '',
+            'region': 'US',
+            'screen_height': 1440,
+            'screen_width': 2550,
+            'secUid': secUid,
+            'tz_name': 'America/New_York',
+            'webcast_language': 'en',
+            #'ms_token': '',  # ??
+            '_signature': '',
+            'WebIdLastTime': int(time())
+        }
+
+        query = urlencode(query_params)
+
+
+
+        xbogus = Signer.sign(query, user_agent.text)
+
+        final_url = f"{TIKTOK_BASE_URL}/api/post/item_list?{xbogus}"
+
+        print(f"Making call to get videos: {final_url}")
+        response = self.make_request(url=final_url, headers=video_headers)
+        print(response.status_code)
+        print(response.text)
 
 
 if __name__ == '__main__':

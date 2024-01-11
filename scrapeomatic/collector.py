@@ -10,10 +10,13 @@ class Collector(metaclass=abc.ABCMeta):
     This class is an interface for all the data collectors in scrape-o-matic.
     """
 
-    def __init__(self, timeout: int, proxy: str, cert_path: str):
+    def __init__(self, timeout: int, proxy: str, cert_path: str, use_session: bool = False):
         self.proxy = proxy
         self.cert_path = cert_path if cert_path is not None else True
         self.timeout = timeout
+        self.use_session = use_session
+        if use_session:
+            self.session = requests.Session()
 
     @classmethod
     def __subclasshook__(cls, subclass):
@@ -64,5 +67,7 @@ class Collector(metaclass=abc.ABCMeta):
         proxy_dict = None
         if self.proxy:
             proxy_dict = Collector.format_proxy(self.proxy)
-
-        return requests.get(url, timeout=self.timeout, headers=headers, params=params, proxies=proxy_dict, verify=self.cert_path)
+        if self.use_session:
+            return self.session.get(url, timeout=self.timeout, headers=headers, params=params, proxies=proxy_dict, verify=self.cert_path)
+        else:
+            return requests.get(url, timeout=self.timeout, headers=headers, params=params, proxies=proxy_dict, verify=self.cert_path)
