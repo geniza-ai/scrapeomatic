@@ -1,13 +1,14 @@
 import json
 import logging
 from functools import lru_cache
+from urllib.parse import quote
 
 import ua_generator
-from bs4 import BeautifulSoup
 from requests import HTTPError, JSONDecodeError
 
 from scrapeomatic.collector import Collector
-from scrapeomatic.utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL, DEFAULT_TIMEOUT, INSTAGRAM_VIDEO_URL
+from scrapeomatic.utils.constants import INSTAGRAM_BASE_URL, INSTAGRAM_PROFILE_URL, DEFAULT_TIMEOUT, \
+    INSTAGRAM_APP_ID, INSTAGRAM_VIDEO_URL
 
 logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
 
@@ -44,17 +45,36 @@ class Instagram(Collector):
             raise HTTPError(error_message) from exc
 
     @lru_cache
-    def get_post_metrics(self, post_id: str) -> dict:
-        headers = {}
-        final_url = f"{INSTAGRAM_VIDEO_URL}/{post_id}?__a=1&__d=dis"
-        print(final_url)
-        response = self.make_request(url=final_url)
+    def get_post(self, url_or_shortcode: str) -> dict:
+        """
+        Scrapes a post from Instagram.  You can provide either the complete URL or the short code from the URL.
+        Args:
+            url_or_shortcode: URL or the short code.
 
-        soup = BeautifulSoup(response.text, "html5lib")
-        body = soup.find('body', {'class': ''})
-        script = body.find('script', {'type': 'text/javascript'})
-        data = json.loads(script.text.replace('window._sharedData = ', '')[:-1])
-        print(data)
+        Returns:  A dictionary of data about the post.
+
+        """
+
+        if "http" in url_or_shortcode:
+            shortcode = url_or_shortcode.split("/p/")[-1].split("/")[0]
+        else:
+            shortcode = url_or_shortcode
+        logging.debug(f"scraping instagram post: {shortcode}")
+
+        variables = {
+            "shortcode": shortcode,
+            "child_comment_count": 20,
+            "fetch_comment_count": 100,
+            "parent_comment_count": 24,
+            "has_threaded_comments": True
+        }
+
+        url = INSTAGRAM_VIDEO_URL + quote(json.dumps(variables))
+
+        headers = {"x-ig-app-id": INSTAGRAM_APP_ID}
+        response = self.make_request(url=url, headers=headers)
+        data = json.loads(response.text)
+        return data["data"]["shortcode_media"]
 
     @staticmethod
     def __build_param(username: str) -> dict:
