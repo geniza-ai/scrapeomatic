@@ -48,6 +48,7 @@ class Instagram(Collector):
     def get_post(self, url_or_shortcode: str) -> dict:
         """
         Scrapes a post from Instagram.  You can provide either the complete URL or the short code from the URL.
+        Sourced from https://scrapfly.io/blog/how-to-scrape-instagram/
         Args:
             url_or_shortcode: URL or the short code.
 
@@ -85,18 +86,18 @@ class Instagram(Collector):
     @staticmethod
     @lru_cache
     def __build_headers(username: str) -> dict:
-        ua = ua_generator.generate()
+        user_agent = ua_generator.generate()
         return {
             'authority': 'www.instagram.com',
             'accept': '*/*',
             'accept-language': 'en-US,en;q=0.9',
             'referer': f"{INSTAGRAM_BASE_URL}/{username}/",
             'sec-ch-prefers-color-scheme': 'dark',
-            'sec-ch-ua': ua.ch.brands,
+            'sec-ch-ua': user_agent.ch.brands,
             'sec-fetch-dest': 'empty',
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'same-origin',
-            'user-agent': ua.text,
+            'user-agent': user_agent.text,
             'x-asbd-id': '198387',
             'x-csrftoken': 'VUm8uVUz0h2Y2CO1SwGgVAG3jQixNBmg',
             'x-ig-app-id': '936619743392459',
