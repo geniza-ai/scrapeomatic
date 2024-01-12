@@ -1,5 +1,6 @@
 import os
 import unittest
+from pprint import pprint
 
 from requests import HTTPError
 
@@ -18,9 +19,17 @@ class TestInstagramScraper(unittest.TestCase):
     def test_basic_call(self):
         instagram_scraper = Instagram()
         results = instagram_scraper.collect("emmachamberlain")
+        pprint(results)
         self.assertIsNotNone(results)
 
     @unittest.skipIf(IN_GITHUB_ACTIONS, "Instagram tests fail on GitHub Actions.")
     def test_no_user(self):
         instagram_scraper = Instagram()
         self.assertRaises(HTTPError, instagram_scraper.collect, "asdfjkahsdjkfhaksdfhajsdhfkajdshf")
+
+    @unittest.skipIf(IN_GITHUB_ACTIONS, "Instagram tests fail on GitHub Actions.")
+    def test_get_post(self):
+        instagram_scraper = Instagram()
+        results = instagram_scraper.get_post("BOTU6rJhShv")
+        pprint(results)
+        self.assertIsNotNone(results)

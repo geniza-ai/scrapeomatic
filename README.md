@@ -38,6 +38,11 @@ results = github_scraper.collect(user_name)
 ## Instagram
 To pull data from Instagram, simply create an Instagram object, then call the `collect(<username>)` method.
 
+### Additional Methods:
+The Instagram collector also features:
+
+* `get_post(<post id>)`:  Returns metadata about a specific post.  The video ID you will need can be found in the Instagram URL for the video. For example: `https://www.instagram.com/p/CuE2WNQs6vH/`, the video id would be `CuE2WNQs6vH`.
+
 ### Example Usage
 
 ```python
@@ -82,6 +87,10 @@ youtube_scraper = YouTube()
 results = youtube_scraper.collect(account)
 ```
 
+### Additional Methods:
+The YouTube collector also features:
+
+* `get_video(<video id>)`:  Returns metadata about a specific video.  The video ID you will need can be found in the YouTube URL for the video. For example: `https://www.youtube.com/watch?v=6YgYXHrDiuk`, the video id would be `6YgYXHrDiuk`.
 
 # Updates
 Social Media platforms change their interfaces from time to time.  This table reflects when Scrape-O-Matic has last been tested.
