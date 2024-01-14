@@ -1,3 +1,28 @@
+PLAYWRIGHT_BLOCK_RESOURCE_TYPES = [
+  'beacon',
+  'csp_report',
+  'font',
+  'image',
+  'imageset',
+  'media',
+  'object',
+  'texttrack',
+]
+
+PLAYWRIGHT_BLOCK_RESOURCE_NAMES = [
+  'adzerk',
+  'analytics',
+  'cdn.api.twitter',
+  'doubleclick',
+  'exelator',
+  'facebook',
+  'fontawesome',
+  'google',
+  'google-analytics',
+  'googletagmanager',
+]
+
+
 DEFAULT_BROWSER = "chrome"
 DEFAULT_TIMEOUT = 5
 DEFAULT_VIDEO_LIMIT = 10

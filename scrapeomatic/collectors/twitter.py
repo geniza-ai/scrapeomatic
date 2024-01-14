@@ -5,7 +5,8 @@ import jmespath
 from playwright.sync_api import sync_playwright, TimeoutError, ProxySettings
 from requests import HTTPError
 from scrapeomatic.collector import Collector
-from scrapeomatic.utils.constants import DEFAULT_TIMEOUT, TWITTER_BASE_URL
+from scrapeomatic.utils.constants import DEFAULT_TIMEOUT, TWITTER_BASE_URL, PLAYWRIGHT_BLOCK_RESOURCE_TYPES, \
+    PLAYWRIGHT_BLOCK_RESOURCE_NAMES
 
 logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
 
@@ -17,10 +18,26 @@ DEFAULT_HEADERS = {
 }
 
 
+def intercept_route(route):
+    """
+    Method to exclude unnecessary routes including images, fonts etc.
+    Args:
+        route: The inbound route.
+    """
+    if route.request.resource_type in PLAYWRIGHT_BLOCK_RESOURCE_TYPES:
+        logging.debug(f'blocking background resource {route.request} blocked type "{route.request.resource_type}"')
+        return route.abort()
+    if any(key in route.request.url for key in PLAYWRIGHT_BLOCK_RESOURCE_NAMES):
+        logging.debug(f"blocking background resource {route.request} blocked name {route.request.url}")
+        return route.abort()
+    return route.continue_()
+
+
 class Twitter(Collector):
     """
-    Collector for Twitter.  Sourced from https://scrapfly.io/blog/how-to-scrape-twitter/.
+    Collector for Twitter.  Inspired by https://scrapfly.io/blog/how-to-scrape-twitter/.
     """
+
     def __init__(self, timeout=DEFAULT_TIMEOUT, proxy=None, cert_path=None):
         super().__init__(timeout, proxy, cert_path)
         self.proxy = proxy
@@ -28,7 +45,10 @@ class Twitter(Collector):
         self.timeout = float(timeout * 1000)
 
         if self.proxy is not None:
-            self.proxy_settings = ProxySettings(proxy)
+            proxy_dict = Collector.format_proxy(self.proxy)
+            self.proxy_settings = ProxySettings(proxy_dict)
+
+        B
 
     def get_tweet(self, url: str) -> dict:
         """
@@ -45,10 +65,12 @@ class Twitter(Collector):
                 _xhr_calls.append(response)
             return response
 
-        with sync_playwright() as pw:
-            browser = pw.chromium.launch(headless=False)
+        with sync_playwright() as pw_firefox:
+            browser = pw_firefox.firefox.launch(headless=True, timeout=self.timeout)
             context = browser.new_context(viewport={"width": 1920, "height": 1080})
             page = context.new_page()
+
+            page.route("**/*", intercept_route)
 
             # enable background request intercepting:
             page.on("response", intercept_response)
@@ -61,9 +83,10 @@ class Twitter(Collector):
             for xhr in tweet_calls:
                 data = xhr.json()
                 result = data['data']['tweetResult']['result']
-                return self.parse_tweet(result)
+                return self.__parse_tweet(result)
 
-    def parse_tweet(self, data: dict) -> dict:
+    @staticmethod
+    def __parse_tweet(data: dict) -> dict:
         """Parse Twitter tweet JSON dataset for the most important fields"""
         result = jmespath.search(
             """{
@@ -107,7 +130,8 @@ class Twitter(Collector):
                 result["poll"]["duration"] = value["string_value"]
         user_data = jmespath.search("core.user_results.result", data)
         if user_data:
-            result["user"] = parse_user(user_data)
+            result["user"] = user_data['legacy']
+
         return result
 
     @lru_cache
@@ -135,14 +159,15 @@ class Twitter(Collector):
                 _xhr_calls.append(response)
             return response
 
-        with sync_playwright() as pw:
-            browser = pw.firefox.launch(headless=True, timeout=self.timeout)
+        with sync_playwright() as pw_firefox:
+            browser = pw_firefox.firefox.launch(headless=True, timeout=self.timeout)
 
             context = browser.new_context(viewport={"width": 1920, "height": 1080},
                                           extra_http_headers=DEFAULT_HEADERS)
             page = context.new_page()
-
-            # enable background request intercepting:
+            # Block cruft
+            page.route("**/*", intercept_route)
+            # Enable background request intercepting:
             page.on("response", intercept_response)
             # go to url and wait for the page to load
             page.goto(final_url)
@@ -158,12 +183,3 @@ class Twitter(Collector):
             for xhr in tweet_calls:
                 data = xhr.json()
                 return data['data']['user']['result']
-
-
-def main():
-    t = Twitter()
-    print(t.collect("FoxNews"))
-
-
-if __name__ == "__main__":
-    main()

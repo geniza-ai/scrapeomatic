@@ -4,8 +4,14 @@ Scrape-O-Matic is a collection of tools designed to easily pull data from popula
 
 Scrape-O-Matic only works with public profiles and does not require any tokens or authentication.
 
+### Caching
+Scrape-O-Matic makes use of caching.  If you repeatedly scrape the same user account in the same process the response are cached to avoid being blocked.
+
 ### Disclaimer:
-These tools are provided for your personal use and with no guarantee at all.  You may only use them in accordance with the respective platforms' terms of service and any applicable laws.  We accept no responsibility for misuse.
+These tools are provided for your personal use and with no guarantee at all.  You may only use them in accordance with the respective platforms' terms of service and any applicable laws.  We accept no responsibility for misuse.  
+
+#### Is Scraping Legal?
+In general, scraping is legal if you are not logging into a website.  However, that does not mean that scraping is welcome by all the sites you wish to scrape.  I recommend using a proxy with rotating IP addresses to avoid being blocked by the various social media sites.  This does not constitute legal advice.
 
 Scrap-o-Matic will work with the following platforms:
 
@@ -76,7 +82,7 @@ results = tiktok_scraper.collect(user_name)
 The TikTok collector uses Selenium and the Chrome or FireFox extensions.  These must be installed for this collector to work.
 
 ## Twitter / X
-To pull data from YouTube, simply create a Twitter object, then call the `collect(<username>)` method.
+To pull data from YouTube, simply create a Twitter object, then call the `collect(<username>)` method.  Twitter/X does not want you scraping their site and will very quickly block you if you are not careful.  To avoid being blocked, you must use some sort of proxy service which rotates the IP address of the requests.
 
 ### Example Usage
 
@@ -87,8 +93,17 @@ account = "<account handle>"
 twitter_scraper = Twitter()
 results = twitter_scraper.collect(account)
 ```
+### Other Methods:
+In addition to getting user profiles, ScrapeOMatic can also retrieve metadata about a specific tweet using the `get_tweet()` method.  You must supply the complete URL for the tweet.
 
+```python
+from scrapeomatic.collectors.twitter import Twitter
 
+account = "<account handle>"
+twitter_scraper = Twitter()
+results = twitter_scraper.get_tweet("https://twitter.com/JokesMemesFacts/status/1187906420248846342")
+
+```
 
 ## YouTube
 To pull data from YouTube, simply create a YouTube object, then call the `collect(<username>)` method.
