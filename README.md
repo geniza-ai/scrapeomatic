@@ -12,6 +12,7 @@ Scrap-o-Matic will work with the following platforms:
 * [Github](#github)
 * [Instagram](#instagram)
 * [TikTok](#tiktok)
+* [Twitter/X](#twitter--x)
 * [YouTube](#youtube)
 
 ## Usage:
@@ -74,8 +75,23 @@ results = tiktok_scraper.collect(user_name)
 
 The TikTok collector uses Selenium and the Chrome or FireFox extensions.  These must be installed for this collector to work.
 
+## Twitter / X
+To pull data from YouTube, simply create a Twitter object, then call the `collect(<username>)` method.
+
+### Example Usage
+
+```python
+from scrapeomatic.collectors.twitter import Twitter
+
+account = "<account handle>"
+twitter_scraper = Twitter()
+results = twitter_scraper.collect(account)
+```
+
+
+
 ## YouTube
-To pull data from YouTube, simply create a YouTube object, then call the `collect(<username>` method.
+To pull data from YouTube, simply create a YouTube object, then call the `collect(<username>)` method.
 
 ### Example Usage
 
@@ -100,5 +116,6 @@ Social Media platforms change their interfaces from time to time.  This table re
 | GitHub | Nov 15, 2023      |
 | Instagram | Nov 6, 2023       |
 | TikTok | Nov 6, 2023       | 
+| Twitter | Jan 14, 2024 |
 | YouTube | Nov 30, 2023 |
 
