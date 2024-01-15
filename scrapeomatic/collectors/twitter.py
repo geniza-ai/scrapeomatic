@@ -2,11 +2,12 @@ import logging
 from functools import lru_cache
 
 import jmespath
-from playwright.sync_api import sync_playwright, TimeoutError, ProxySettings
+from playwright.sync_api import sync_playwright, ProxySettings
+from playwright.sync_api import TimeoutError as PW_TimeoutError
 from requests import HTTPError
 from scrapeomatic.collector import Collector
 from scrapeomatic.utils.constants import DEFAULT_TIMEOUT, TWITTER_BASE_URL, PLAYWRIGHT_BLOCK_RESOURCE_TYPES, \
-    PLAYWRIGHT_BLOCK_RESOURCE_NAMES
+    PLAYWRIGHT_BLOCK_RESOURCE_NAMES, DEFAULT_TWEET_TIMEOUT
 
 logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
 
@@ -35,7 +36,7 @@ def intercept_route(route):
 
 class Twitter(Collector):
     """
-    Collector for Twitter.  Inspired by https://scrapfly.io/blog/how-to-scrape-twitter/.
+    Collector for Twitter.  Derived from https://scrapfly.io/blog/how-to-scrape-twitter/.
     """
 
     def __init__(self, timeout=DEFAULT_TIMEOUT, proxy=None, cert_path=None):
@@ -47,8 +48,6 @@ class Twitter(Collector):
         if self.proxy is not None:
             proxy_dict = Collector.format_proxy(self.proxy)
             self.proxy_settings = ProxySettings(proxy_dict)
-
-        B
 
     def get_tweet(self, url: str) -> dict:
         """
@@ -135,16 +134,19 @@ class Twitter(Collector):
         return result
 
     @lru_cache
-    def collect(self, username: str) -> dict:
+    def collect(self, username: str, with_tweets: bool = True, tweet_delay: int = DEFAULT_TWEET_TIMEOUT) -> dict:
         """
         This function collects metadata about a specific Twitter/X user.
         Args:
             username: The account name with or without the leading @.
+            with_tweets: Boolean flag to include Tweets or not. Including tweets requires additional API calls, and hence is slower.
+            tweet_delay: Number of milliseconds to delay between initial call and call to get tweets.  Defaults to 2000.
 
         Returns: A dictionary of account metadata.
 
         """
         _xhr_calls = []
+        profile_info = {}
 
         # Remove @ if present
         if username.startswith('@'):
@@ -161,25 +163,52 @@ class Twitter(Collector):
 
         with sync_playwright() as pw_firefox:
             browser = pw_firefox.firefox.launch(headless=True, timeout=self.timeout)
-
             context = browser.new_context(viewport={"width": 1920, "height": 1080},
-                                          extra_http_headers=DEFAULT_HEADERS)
+                                          extra_http_headers=DEFAULT_HEADERS,
+                                          strict_selectors=False)
             page = context.new_page()
+
             # Block cruft
             page.route("**/*", intercept_route)
+
             # Enable background request intercepting:
             page.on("response", intercept_response)
+
             # go to url and wait for the page to load
             page.goto(final_url)
+
             try:
-                page.wait_for_selector("[data-testid='primaryColumn']")
-            except TimeoutError as exc:
-                error_message = f"Error retrieving Twitter profile. Your IP could be blocked or the profile could be private."
+                primary_column = page.locator("[data-testid='primaryColumn']")
+                primary_column.wait_for(timeout=self.timeout)
+            except PW_TimeoutError as exc:
+                error_message = f"Error retrieving Twitter profile {username}. Your IP could be blocked or the profile could be private."
                 logging.error(error_message)
                 raise HTTPError(error_message) from exc
+
+
+            if with_tweets:
+                page.wait_for_timeout(tweet_delay)
 
             # find all tweet background requests:
             tweet_calls = [f for f in _xhr_calls if "UserBy" in f.url]
             for xhr in tweet_calls:
                 data = xhr.json()
-                return data['data']['user']['result']
+                profile_info = data['data']['user']['result']
+
+
+            tweets = [f for f in _xhr_calls if "UserTweets" in f.url]
+            for xhr in tweets:
+                tweet_data = xhr.json()
+                instuctions = tweet_data['data']['user']['result']['timeline_v2']['timeline']['instructions']
+
+                for inst in instuctions:
+                    if inst['type'] == 'TimelineAddEntries':
+                        tweets = []
+                        for entry in inst['entries']:
+                            tweet = entry['content']['itemContent']['tweet_results']['result']['legacy']
+                            tweets.append(tweet)
+
+                # Add tweet entries to profile
+                profile_info['tweets'] = tweets
+
+            return profile_info

@@ -84,6 +84,14 @@ The TikTok collector uses Selenium and the Chrome or FireFox extensions.  These 
 ## Twitter / X
 To pull data from YouTube, simply create a Twitter object, then call the `collect(<username>)` method.  Twitter/X does not want you scraping their site and will very quickly block you if you are not careful.  To avoid being blocked, you must use some sort of proxy service which rotates the IP address of the requests.
 
+
+### Getting the timeline:
+Twitter makes it very difficult to pull the timeline of an individual user. However, you can do this with Scrape-O-Matic but the cost is a small delay in scraping.  The tweets associated with an individual profile come in a separate XHR call which takes a second or two to receive after the initial call.  If you are simply looking to get user profile set the `with_tweets` parameter to `False`.  The tweet_delay defaults to 2000ms.  You can reduce this but you may not always get the tweets in the profile.
+
+The `collect()` method has two additional parameters:
+* `with_tweets`:  A boolean variable which you can set if you do not want the tweets with the user profile
+* `tweet_delay`:  The time delay in milliseconds for the scraper to wait before attempting to parse tweets.
+
 ### Example Usage
 
 ```python

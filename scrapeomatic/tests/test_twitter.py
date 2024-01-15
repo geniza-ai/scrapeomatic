@@ -17,7 +17,7 @@ class TestTwitterScraper(unittest.TestCase):
 
     def test_no_user(self):
         twitter_scraper = Twitter()
-        self.assertRaises(HTTPError, twitter_scraper.collect, "asdfjkahsdjkfhaksdfhajsdhfkajdshf")
+        self.assertRaises(HTTPError, twitter_scraper.collect, "asdfjkahsdjkfhaksdfhajsdhfkajdshf", False)
 
     def test_get_tweet(self):
         twitter_scraper = Twitter()

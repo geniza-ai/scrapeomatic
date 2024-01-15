@@ -38,4 +38,5 @@ INSTAGRAM_VIDEO_URL = f"{INSTAGRAM_BASE_URL}/graphql/query/?query_hash={INSTAGRA
 INSTAGRAM_APP_ID = "936619743392459"
 TIKTOK_BASE_URL = "https://tiktok.com/@"
 TWITTER_BASE_URL = "https://x.com/"
+DEFAULT_TWEET_TIMEOUT = 2000
 YOUTUBE_BASE_URL = "https://www.youtube.com/@"
