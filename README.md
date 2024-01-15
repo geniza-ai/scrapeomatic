@@ -4,14 +4,21 @@ Scrape-O-Matic is a collection of tools designed to easily pull data from popula
 
 Scrape-O-Matic only works with public profiles and does not require any tokens or authentication.
 
+### Caching
+Scrape-O-Matic makes use of caching.  If you repeatedly scrape the same user account in the same process the response are cached to avoid being blocked.
+
 ### Disclaimer:
-These tools are provided for your personal use and with no guarantee at all.  You may only use them in accordance with the respective platforms' terms of service and any applicable laws.  We accept no responsibility for misuse.
+These tools are provided for your personal use and with no guarantee at all.  You may only use them in accordance with the respective platforms' terms of service and any applicable laws.  We accept no responsibility for misuse.  
+
+#### Is Scraping Legal?
+In general, scraping is legal if you are not logging into a website.  However, that does not mean that scraping is welcome by all the sites you wish to scrape.  I recommend using a proxy with rotating IP addresses to avoid being blocked by the various social media sites.  This does not constitute legal advice.
 
 Scrap-o-Matic will work with the following platforms:
 
 * [Github](#github)
 * [Instagram](#instagram)
 * [TikTok](#tiktok)
+* [Twitter/X](#twitter--x)
 * [YouTube](#youtube)
 
 ## Usage:
@@ -74,8 +81,40 @@ results = tiktok_scraper.collect(user_name)
 
 The TikTok collector uses Selenium and the Chrome or FireFox extensions.  These must be installed for this collector to work.
 
+## Twitter / X
+To pull data from YouTube, simply create a Twitter object, then call the `collect(<username>)` method.  Twitter/X does not want you scraping their site and will very quickly block you if you are not careful.  To avoid being blocked, you must use some sort of proxy service which rotates the IP address of the requests.
+
+
+### Getting the timeline:
+Twitter makes it very difficult to pull the timeline of an individual user. However, you can do this with Scrape-O-Matic but the cost is a small delay in scraping.  The tweets associated with an individual profile come in a separate XHR call which takes a second or two to receive after the initial call.  If you are simply looking to get user profile set the `with_tweets` parameter to `False`.  The tweet_delay defaults to 2000ms.  You can reduce this but you may not always get the tweets in the profile.
+
+The `collect()` method has two additional parameters:
+* `with_tweets`:  A boolean variable which you can set if you do not want the tweets with the user profile
+* `tweet_delay`:  The time delay in milliseconds for the scraper to wait before attempting to parse tweets.
+
+### Example Usage
+
+```python
+from scrapeomatic.collectors.twitter import Twitter
+
+account = "<account handle>"
+twitter_scraper = Twitter()
+results = twitter_scraper.collect(account)
+```
+### Other Methods:
+In addition to getting user profiles, ScrapeOMatic can also retrieve metadata about a specific tweet using the `get_tweet()` method.  You must supply the complete URL for the tweet.
+
+```python
+from scrapeomatic.collectors.twitter import Twitter
+
+account = "<account handle>"
+twitter_scraper = Twitter()
+results = twitter_scraper.get_tweet("https://twitter.com/JokesMemesFacts/status/1187906420248846342")
+
+```
+
 ## YouTube
-To pull data from YouTube, simply create a YouTube object, then call the `collect(<username>` method.
+To pull data from YouTube, simply create a YouTube object, then call the `collect(<username>)` method.
 
 ### Example Usage
 
@@ -100,5 +139,6 @@ Social Media platforms change their interfaces from time to time.  This table re
 | GitHub | Nov 15, 2023      |
 | Instagram | Nov 6, 2023       |
 | TikTok | Nov 6, 2023       | 
+| Twitter | Jan 14, 2024 |
 | YouTube | Nov 30, 2023 |
 

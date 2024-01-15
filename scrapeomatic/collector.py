@@ -41,13 +41,20 @@ class Collector(metaclass=abc.ABCMeta):
         """
         return pd.DataFrame(self.collect(username))
 
+    @staticmethod
+    def format_proxy(proxy_url: str) -> dict:
+        return {
+            'http': f'http://{proxy_url}',
+            'https': f'http://{proxy_url}'
+        }
+
     def make_request(self, url, params=None, headers=None):
         """
-        Utility method to make an HTTP request.
-        :param url:
-        :param params:
-        :param headers:
-        :return:
+        Utility method to make an HTTP GET request.
+        :param url:  The URL which we are requesting.
+        :param params:  A dictionary of parameters to be added to the request
+        :param headers:  A dictionary of headers to be added to the request.
+        :return:  The results of the request.
         """
         if headers is None:
             headers = {}
@@ -56,9 +63,6 @@ class Collector(metaclass=abc.ABCMeta):
 
         proxy_dict = None
         if self.proxy:
-            proxy_dict = {
-                'http': f'http://{self.proxy}',
-                'https': f'http://{self.proxy}'
-            }
+            proxy_dict = Collector.format_proxy(self.proxy)
 
         return requests.get(url, timeout=self.timeout, headers=headers, params=params, proxies=proxy_dict, verify=self.cert_path)

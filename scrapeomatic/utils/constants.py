@@ -1,3 +1,28 @@
+PLAYWRIGHT_BLOCK_RESOURCE_TYPES = [
+  'beacon',
+  'csp_report',
+  'font',
+  'image',
+  'imageset',
+  'media',
+  'object',
+  'texttrack',
+]
+
+PLAYWRIGHT_BLOCK_RESOURCE_NAMES = [
+  'adzerk',
+  'analytics',
+  'cdn.api.twitter',
+  'doubleclick',
+  'exelator',
+  'facebook',
+  'fontawesome',
+  'google',
+  'google-analytics',
+  'googletagmanager',
+]
+
+
 DEFAULT_BROWSER = "chrome"
 DEFAULT_TIMEOUT = 5
 DEFAULT_VIDEO_LIMIT = 10
@@ -12,4 +37,6 @@ INSTAGRAM_PROFILE_URL = f"{INSTAGRAM_BASE_URL}/api/v1/users/web_profile_info/"
 INSTAGRAM_VIDEO_URL = f"{INSTAGRAM_BASE_URL}/graphql/query/?query_hash={INSTAGRAM_QUERY_HASH}&variables="
 INSTAGRAM_APP_ID = "936619743392459"
 TIKTOK_BASE_URL = "https://tiktok.com/@"
+TWITTER_BASE_URL = "https://x.com/"
+DEFAULT_TWEET_TIMEOUT = 2000
 YOUTUBE_BASE_URL = "https://www.youtube.com/@"
