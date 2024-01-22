@@ -36,7 +36,7 @@ def intercept_route(route):
 
 class Twitter(Collector):
     """
-    Collector for Twitter.  Derived from https://scrapfly.io/blog/how-to-scrape-twitter/.
+    Collector for Twitter.  Inspired by https://scrapfly.io/blog/how-to-scrape-twitter/.
     """
 
     def __init__(self, timeout=DEFAULT_TIMEOUT, proxy=None, cert_path=None):
@@ -185,7 +185,6 @@ class Twitter(Collector):
                 logging.error(error_message)
                 raise HTTPError(error_message) from exc
 
-
             if with_tweets:
                 page.wait_for_timeout(tweet_delay)
 
@@ -194,7 +193,6 @@ class Twitter(Collector):
             for xhr in tweet_calls:
                 data = xhr.json()
                 profile_info = data['data']['user']['result']
-
 
             tweets = [f for f in _xhr_calls if "UserTweets" in f.url]
             for xhr in tweets:

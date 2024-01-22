@@ -40,7 +40,7 @@ class TikTok2(Collector):
 
         response = self.make_request(url=final_url, headers=HEADERS)
         if response.status_code != 200:
-            raise HTTPError(f"Error retrieving profile for {username}.  Status Code: {response.status_code}")
+            raise HTTPError(f"Error retrieving profile for {username}.  URL: {final_url} Status Code: {response.status_code}")
 
         # Now parse the incoming data
         soup = BeautifulSoup(response.text, "html5lib")
@@ -51,6 +51,13 @@ class TikTok2(Collector):
 
         # The user info is contained in a large JS object
         tt_script = soup.find('script', attrs={'id': "__UNIVERSAL_DATA_FOR_REHYDRATION__"})
+
+        # Wait a few seconds for the script
+        counter = 0
+        if tt_script is None:
+
+            counter++
+
         try:
             raw_json = json.loads(tt_script.string)
         except AttributeError as exc:
@@ -147,4 +154,4 @@ class TikTok2(Collector):
 
 if __name__ == '__main__':
     tiktok2 = TikTok2()
-    results = tiktok2.collect('tara_town')
+    results = tiktok2.collect('diemerve')

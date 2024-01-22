@@ -12,10 +12,12 @@ import ua_generator
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from bs4 import BeautifulSoup
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.wait import WebDriverWait
 
 from scrapeomatic.collector import Collector
 from scrapeomatic.utils.tiktok.xbogus import Signer
-from scrapeomatic.utils.utils import Utils
+from scrapeomatic.utils.async_utils import AsyncUtils
 from scrapeomatic.utils.constants import DEFAULT_TIMEOUT, TIKTOK_BASE_URL
 
 logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s', level=logging.DEBUG)
@@ -57,8 +59,11 @@ class TikTok3(Collector):
         """
 
         final_url = f"{TIKTOK_BASE_URL}/@{username}"
-        # self.driver.implicitly_wait(5)
+        self.driver.implicitly_wait(5)
         self.driver.get(final_url)
+
+        wait = WebDriverWait(self.driver, 5)
+        wait.until(expected_conditions.title_contains(f"@{username}"))
 
         html = self.driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
@@ -69,6 +74,7 @@ class TikTok3(Collector):
 
         # The user info is contained in a large JS object
         tt_script = soup.find('script', attrs={'id': "__UNIVERSAL_DATA_FOR_REHYDRATION__"})
+        pprint(tt_script)
         try:
             raw_json = json.loads(tt_script.string)
         except AttributeError as exc:
@@ -77,7 +83,7 @@ class TikTok3(Collector):
         user_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['user']
         stats_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['stats']
 
-        videos = self.get_videos(username, user_data['secUid'])
+        # videos = self.get_videos(username, user_data['secUid'])
 
         profile_data = {
             'sec_id': user_data['secUid'],
@@ -105,7 +111,7 @@ class TikTok3(Collector):
 
     def get_videos(self, username: str, secUid: str) -> list:
         video_list = []
-        cookies_dict = Utils.get_cookie_dict(self.driver)
+        cookies_dict = AsyncUtils.get_cookie_dict(self.driver)
         device_id = str(random.randint(10 ** 18, 10 ** 19 - 1))
         video_headers = {
             'Accept': '*/*',
@@ -164,13 +170,12 @@ class TikTok3(Collector):
 
         return video_list
 
-
     def __set_session_params(self, session):
         """Set the session params for a TikTokPlaywrightSession"""
         user_agent = session.page.evaluate("() => navigator.userAgent")
         language = "en"
         platform = session.page.evaluate("() => navigator.platform")
-        device_id = str(random.randint(10**18, 10**19 - 1))  # Random device id
+        device_id = str(random.randint(10 ** 18, 10 ** 19 - 1))  # Random device id
         history_len = str(random.randint(1, 10))  # Random history length
         screen_height = str(random.randint(600, 1080))  # Random screen height
         screen_width = str(random.randint(800, 1920))  # Random screen width
@@ -212,4 +217,4 @@ class TikTok3(Collector):
 
 if __name__ == '__main__':
     tiktok3 = TikTok3()
-    results = tiktok3.collect('tara_town')
+    results = tiktok3.collect('diemerve')

@@ -1,7 +1,7 @@
 from selenium import webdriver
 
 
-class Utils:
+class AsyncUtils:
     @staticmethod
     def get_cookie_dict(driver: webdriver) -> dict:
         """
