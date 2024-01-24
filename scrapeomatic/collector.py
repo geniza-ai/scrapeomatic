@@ -1,4 +1,5 @@
 import abc
+import json
 from functools import lru_cache
 
 import pandas as pd
@@ -70,3 +71,16 @@ class Collector(metaclass=abc.ABCMeta):
         if self.use_session:
             return self.session.get(url, timeout=self.timeout, headers=headers, params=params, proxies=proxy_dict, verify=self.cert_path)
         return requests.get(url, timeout=self.timeout, headers=headers, params=params, proxies=proxy_dict, verify=self.cert_path)
+
+    @staticmethod
+    def write_to_file(json_data, outfile_name) -> None:
+        """
+        Used for testing. Writes JSON objects to a file.
+        Args:
+            json_data: The object to be written to a file/
+            outfile_name: The output file name
+
+        Returns: Nothing...
+        """
+        with open(outfile_name, "w") as outfile:
+            json.dump(json_data, outfile, indent=4)
