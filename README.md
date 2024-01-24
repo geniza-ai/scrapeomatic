@@ -17,6 +17,7 @@ Scrap-o-Matic will work with the following platforms:
 
 * [Github](#github)
 * [Instagram](#instagram)
+* [Threads](#threads)
 * [TikTok](#tiktok)
 * [Twitter/X](#twitter--x)
 * [YouTube](#youtube)
@@ -65,6 +66,28 @@ In the constructor, you can specify two additional options:
 
 * `proxy`: An address for a proxy server
 * `timeout`:  A timeout value in seconds.  Defaults to 5 seconds.
+
+
+## Threads
+To pull metadata from Threads (https://www.threads.net), simply create a Threads object then call the `collect(<username>)` method.
+
+## Other Methods:
+You can retrieve an individual post along with all its associated metadata with the `get_post(<id>)` method.  You can get the post_id from the URL.  IE:  `https://threads.net/t/<id>`
+
+## Example Usage
+
+```python
+from scrapeomatic.collectors.threads import Threads
+
+user_name = "<username>"
+threads_scraper = Threads()
+profile_info = threads_scraper.collect(user_name)
+
+post_id = "<post_id>"
+post_info = threads_scraper.get_post(post_id)
+
+```
+
 
 ## TikTok
 To pull data from TikTok, simply create a TikTok object, then call the `collect(<username>)` method.
@@ -140,6 +163,7 @@ Social Media platforms change their interfaces from time to time.  This table re
 |:---------|:------------------|
 | GitHub | Nov 15, 2023      |
 | Instagram | Nov 6, 2023       |
+| Threads | Jan 24, 2024 | 
 | TikTok | Jan 24, 2024      | 
 | Twitter | Jan 14, 2024      |
 | YouTube | Nov 30, 2023      |

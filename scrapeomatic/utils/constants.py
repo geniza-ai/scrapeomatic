@@ -36,6 +36,7 @@ INSTAGRAM_QUERY_HASH = "b3055c01b4b222b8a47dc12b090e4e64"
 INSTAGRAM_PROFILE_URL = f"{INSTAGRAM_BASE_URL}/api/v1/users/web_profile_info/"
 INSTAGRAM_VIDEO_URL = f"{INSTAGRAM_BASE_URL}/graphql/query/?query_hash={INSTAGRAM_QUERY_HASH}&variables="
 INSTAGRAM_APP_ID = "936619743392459"
+THREADS_BASE_URL = "https://www.threads.net/"
 TIKTOK_BASE_URL = "https://tiktok.com/@"
 TWITTER_BASE_URL = "https://x.com/"
 DEFAULT_TWEET_TIMEOUT = 2000
