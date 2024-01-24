@@ -188,8 +188,11 @@ class Twitter(Collector):
                     if inst['type'] == 'TimelineAddEntries':
                         tweets = []
                         for entry in inst['entries']:
-                            tweet = entry['content']['itemContent']['tweet_results']['result']['legacy']
-                            tweets.append(tweet)
+                            try:
+                                tweet = entry['content']['itemContent']['tweet_results']['result']['legacy']
+                                tweets.append(tweet)
+                            except KeyError as exc:
+                                logging.warning(f"Missing key in tweet: {exc}")
 
                 # Add tweet entries to profile
                 profile_info['tweets'] = tweets
