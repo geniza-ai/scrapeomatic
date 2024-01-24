@@ -49,8 +49,13 @@ class TikTok(Collector):
             page.on("response", intercept_response)
 
             # Navigate to the profile page
-            page.goto(final_url, referer=final_url)
+            response = page.goto(final_url, referer=final_url)
             page.wait_for_timeout(1500)
+
+            if response.status != 200:
+                logging.error(f"Bad response: {response}")
+                raise ValueError(f"Error retrieving page: {response}")
+
             # Get the page content
             html = page.content()
 
@@ -66,9 +71,11 @@ class TikTok(Collector):
                 raise JSONDecodeError(
                     f"ScrapeOMatic was unable to parse the data from TikTok user {username}. Please try again.\n {exc}") from exc
 
+            if "userInfo" not in raw_json['__DEFAULT_SCOPE__']['webapp.user-detail'].keys():
+                raise ValueError(f"No profile found for user {username}")
+
             user_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['user']
             stats_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['stats']
-
 
             # button = page.get_by_text('p:has-text("Continue as guest")')
             # guest_button = page.locator(selector="div", has=button)
@@ -82,7 +89,6 @@ class TikTok(Collector):
             # page.keyboard.press("PageDown")
             # page.wait_for_timeout(500)
             # page.keyboard.press("PageDown")
-
 
             data_calls = [f for f in _xhr_calls if "list" in f.url]
             for call in data_calls:
