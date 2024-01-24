@@ -13,3 +13,4 @@ jmespath~=1.0.1
 ua_generator
 parsel==1.8.1
 nested_lookup
+html5lib
