@@ -7,8 +7,9 @@ beautifulsoup4~=4.12.2
 scrapetube~=2.5.1
 setuptools~=68.2.0
 playwright~=1.40.0
+requests-html-playwright~=0.11.2
 
 jmespath~=1.0.1
-
+ua_generator
 parsel==1.8.1
 nested_lookup
