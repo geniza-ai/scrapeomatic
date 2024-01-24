@@ -15,5 +15,6 @@ scrapetube~=2.5.1
 ua-generator
 setuptools~=68.2.0
 playwright~=1.40.0
+chromedriver-autoinstaller
 
 jmespath~=1.0.1

@@ -1,162 +1,124 @@
+import json
 import logging
+from pprint import pprint
 
 import emoji
 import ua_generator
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.options import Options as ChromeOptions
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
-from selenium.webdriver.support import expected_conditions
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.firefox import GeckoDriverManager
+from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
+from requests import JSONDecodeError
 
 from scrapeomatic.collector import Collector
-from scrapeomatic.utils.constants import DEFAULT_BROWSER, TIKTOK_BASE_URL, DEFAULT_TIMEOUT
+from scrapeomatic.utils.async_utils import AsyncUtils
+from scrapeomatic.utils.constants import DEFAULT_TIMEOUT, TIKTOK_BASE_URL
 
-logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
+logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s', level=logging.INFO)
+
+ua = ua_generator.generate()
+user_agent = ua.text
 
 
 class TikTok(Collector):
 
-    def __init__(self, browser_name=None, proxy=None, cert_path=None):
+    def __init__(self, proxy: str = None, cert_path: str = None, timeout: int = DEFAULT_TIMEOUT):
         super().__init__(DEFAULT_TIMEOUT, proxy, cert_path)
-        # Initialize the driver.  Default to chrome
-        self.hashtags = {}
-        self.proxy = proxy
-        if not browser_name:
-            browser_name = DEFAULT_BROWSER
-
-        browser_name = browser_name.strip().lower()
-
-        if browser_name == "chrome":
-            browser_option = ChromeOptions()
-            browser_option = self.__set_properties(browser_option)
-
-            # Add proxy server if present.
-            if self.proxy is not None:
-                browser_option.add_argument(f'--proxy-server={self.proxy}')
-
-            service = ChromeService(ChromeDriverManager().install())
-            self.driver = webdriver.Chrome(service=service, options=browser_option)
-        elif browser_name == "firefox":
-            browser_option = FirefoxOptions()
-            browser_option = self.__set_properties(browser_option)
-            service = FirefoxService(GeckoDriverManager().install())
-            self.driver = webdriver.Firefox(service=service, options=browser_option)
-        else:
-            raise ValueError("Invalid browser choice. Options are chrome or firefox.")
+        self.timeout = timeout * 1000
 
     def collect(self, username: str) -> dict:
-        """
-        This function will and return all publicly available information from the users' TikTok profile.
-        :param username: The username whose info you wish to gather.
-        :return: A dict of the user's account information.
-        """
-
+        _xhr_calls = []
         final_url = f"{TIKTOK_BASE_URL}{username}"
 
-        try:
-            self.driver.get(final_url)
-        except AttributeError as exc:
-            raise AttributeError(f"Error retrieving data from URL: {final_url}") from exc
+        def intercept_response(response):
+            """Capture all background requests and save them."""
+            # We can extract details from background requests
+            if response.request.resource_type == "xhr":
+                logging.debug(f"Appending {response.request.url}")
+                _xhr_calls.append(response)
+            return response
 
-        wait = WebDriverWait(self.driver, 5)
-        wait.until(expected_conditions.title_contains(f"@{username}"))
+        with sync_playwright() as pw_firefox:
+            browser = pw_firefox.firefox.launch(headless=True, timeout=self.timeout)
+            context = browser.new_context(viewport={"width": 1920, "height": 1080},
+                                          strict_selectors=False)
+            page = context.new_page()
 
-        state_data = self.driver.execute_script("return window['SIGI_STATE']")
-        user_data = state_data['UserModule']['users'][username.lower()]
-        stats_data = state_data['UserModule']['stats'][username.lower()]
-        videos = self.__get_videos(state_data['ItemModule'])
-        self.hashtags = self.__sort_dict(self.hashtags)
+            # Block cruft
+            page.route("**/*", AsyncUtils.intercept_route)
 
-        profile_data = {
-            'sec_id': user_data['secUid'],
-            'id': user_data['id'],
-            'is_secret': user_data['secret'],
-            'username': user_data['uniqueId'],
-            'bio': emoji.demojize(user_data['signature'], delimiters=("", "")),
-            'avatar_image': user_data['avatarMedium'],
-            'following': stats_data['followingCount'],
-            'followers': stats_data['followerCount'],
-            'hearts': stats_data['heart'],
-            'heart_count': stats_data['heartCount'],
-            'video_count': stats_data['videoCount'],
-            'is_verified': user_data['verified'],
-            'videos': videos,
-            'hashtags': self.hashtags
-        }
-        return profile_data
+            # Enable background request intercepting:
+            page.on("response", intercept_response)
 
-    def close(self):
-        self.driver.close()
-        self.driver.quit()
+            # Navigate to the profile page
+            response = page.goto(final_url, referer=final_url)
+            page.wait_for_timeout(1500)
 
-    @staticmethod
-    def __set_properties(browser_option):
-        user_agent = ua_generator.generate()
-        browser_option.add_argument('--headless')
-        browser_option.add_argument('--disable-extensions')
-        browser_option.add_argument('--incognito')
-        browser_option.add_argument("--no-sandbox")
-        browser_option.add_argument("--disable-dev-shm-usage")
-        browser_option.add_argument('--disable-gpu')
-        browser_option.add_argument('--log-level=3')
-        browser_option.add_argument(f'user-agent={user_agent.text}')
-        browser_option.add_argument('--disable-notifications')
-        browser_option.add_argument('--disable-popup-blocking')
+            if response.status != 200:
+                logging.error(f"Bad response: {response}")
+                raise ValueError(f"Error retrieving page: {response}")
 
-        return browser_option
+            # Get the page content
+            html = page.content()
 
-    @staticmethod
-    def __sort_dict(hashtag_dict: dict) -> dict:
-        sorted_hashtags = sorted(hashtag_dict.items(), key=lambda x: x[1], reverse=True)
-        return dict(sorted_hashtags)
+            # Parse it.
+            soup = BeautifulSoup(html, 'html.parser')
 
-    def __get_videos(self, item_list: dict) -> list:
-        video_list = []
-        for item in item_list.values():
-            video = {}
-            hashtags = []
-            # Get the video description
-            video['description'] = emoji.demojize(item['desc'], delimiters=("", ""))
-            video['nickname'] = emoji.demojize(item['nickname'], delimiters=("", ""))
-            video['stats'] = item['stats']
-            video['create_date'] = item['createTime']
-            video['location_created'] = item['locationCreated']
+            # The user info is contained in a large JS object called __UNIVERSAL_DATA_FOR_REHYDRATION__.
+            tt_script = soup.find('script', attrs={'id': "__UNIVERSAL_DATA_FOR_REHYDRATION__"})
 
-            long_desc = ""
-            # Get Longer Description
-            for challenge in item['challenges']:
-                if len(long_desc) > 0 and len(challenge['desc']) > 0:
-                    long_desc += "\n"
-                long_desc += challenge['desc']
-            video['long_desc'] = long_desc
+            try:
+                raw_json = json.loads(tt_script.string)
+            except AttributeError as exc:
+                raise JSONDecodeError(
+                    f"ScrapeOMatic was unable to parse the data from TikTok user {username}. Please try again.\n {exc}") from exc
 
-            # Get the hashtags
-            for tag in item['textExtra']:
-                # skip empty hashtags
-                if len(tag) == 0:
-                    continue
+            if "userInfo" not in raw_json['__DEFAULT_SCOPE__']['webapp.user-detail'].keys():
+                raise ValueError(f"No profile found for user {username}")
 
-                # Convert to lower case and remove leading and trailing whitespace.
-                hashtag = tag['hashtagName'].lower().strip()
+            user_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['user']
+            stats_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['stats']
 
-                # Check length again...
-                if not hashtag or len(hashtag) == 0:
-                    continue
+            # button = page.get_by_text('p:has-text("Continue as guest")')
+            # guest_button = page.locator(selector="div", has=button)
+            # if guest_button is not None:
+            #     logging.debug("Clicking button.")
+            #     guest_button.click(no_wait_after=True)
 
-                hashtags.append(hashtag)
+            # page.click('.css-dcgpa6-DivBoxContainer');
+            # page.click('.emuynwa3');
+            # page.wait_for_timeout(500)
+            # page.keyboard.press("PageDown")
+            # page.wait_for_timeout(500)
+            # page.keyboard.press("PageDown")
 
-                hashtag_keys = self.hashtags.keys()
-                # Add to global list
-                if hashtag not in hashtag_keys:
-                    self.hashtags[hashtag] = 1
-                else:
-                    self.hashtags[hashtag] += 1
+            data_calls = [f for f in _xhr_calls if "list" in f.url]
+            for call in data_calls:
+                logging.debug(call.json())
 
-            video['hashtags'] = hashtags
-            video_list.append(video)
+            profile_data = {
+                'sec_id': user_data['secUid'],
+                'id': user_data['id'],
+                'is_secret': user_data['secret'],
+                'username': user_data['uniqueId'],
+                'bio': emoji.demojize(user_data['signature'], delimiters=("", "")),
+                'avatar_image': user_data['avatarMedium'],
+                'following': stats_data['followingCount'],
+                'followers': stats_data['followerCount'],
+                'language': user_data['language'],
+                'nickname': emoji.demojize(user_data['nickname'], delimiters=("", "")),
+                'hearts': stats_data['heart'],
+                'region': user_data['region'],
+                'verified': user_data['verified'],
+                'heart_count': stats_data['heartCount'],
+                'video_count': stats_data['videoCount'],
+                'is_verified': user_data['verified'],
+                # 'videos': videos,
+                # 'hashtags': self.hashtags
+            }
 
-        return video_list
+            return profile_data
+
+
+if __name__ == '__main__':
+    tiktok = TikTok()
+    results = tiktok.collect('brookemonk_')
+    pprint(results)

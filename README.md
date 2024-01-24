@@ -69,6 +69,8 @@ In the constructor, you can specify two additional options:
 ## TikTok
 To pull data from TikTok, simply create a TikTok object, then call the `collect(<username>)` method.
 
+** Note:  TikTok made some breaking changes to their UI.  Currently the collect method will retrieve profile metadata, but not the video list. ** 
+
 ### Example Usage
 
 ```python
@@ -138,7 +140,7 @@ Social Media platforms change their interfaces from time to time.  This table re
 |:---------|:------------------|
 | GitHub | Nov 15, 2023      |
 | Instagram | Nov 6, 2023       |
-| TikTok | Nov 6, 2023       | 
-| Twitter | Jan 14, 2024 |
-| YouTube | Nov 30, 2023 |
+| TikTok | Jan 24, 2024      | 
+| Twitter | Jan 14, 2024      |
+| YouTube | Nov 30, 2023      |
 
