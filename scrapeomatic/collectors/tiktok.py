@@ -69,12 +69,12 @@ class TikTok(Collector):
             user_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['user']
             stats_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['stats']
 
-            """
-            button = page.get_by_text('p:has-text("Continue as guest")')
-            guest_button = page.locator(selector="div", has=button)
-            if guest_button is not None:
-                logging.debug("Clicking button.")
-                guest_button.click(no_wait_after=True)
+
+            # button = page.get_by_text('p:has-text("Continue as guest")')
+            # guest_button = page.locator(selector="div", has=button)
+            # if guest_button is not None:
+            #     logging.debug("Clicking button.")
+            #     guest_button.click(no_wait_after=True)
 
             # page.click('.css-dcgpa6-DivBoxContainer');
             # page.click('.emuynwa3');
@@ -82,7 +82,7 @@ class TikTok(Collector):
             # page.keyboard.press("PageDown")
             # page.wait_for_timeout(500)
             # page.keyboard.press("PageDown")
-            """
+
 
             data_calls = [f for f in _xhr_calls if "list" in f.url]
             for call in data_calls:

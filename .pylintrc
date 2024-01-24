@@ -387,7 +387,7 @@ preferred-modules=
 
 # The type of string formatting that logging methods do. `old` means using %
 # formatting, `new` is for `{}` formatting.
-logging-format-style=old
+logging-format-style=new
 
 # Logging modules to check that the string format arguments are in logging
 # function parameter format.
@@ -427,7 +427,8 @@ disable=raw-checker-failed,
         missing-class-docstring,
         logging-fstring-interpolation,
         consider-using-with,
-        use-dict-literal
+        use-dict-literal,
+        duplicate-code
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

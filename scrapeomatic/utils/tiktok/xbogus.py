@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 from hashlib import md5
 from time import time
 
@@ -73,7 +75,7 @@ class Signer:
 
     @staticmethod
     def checksum(salt_list: str) -> int:
-        checksum = 64;
+        checksum = 64
         _ = [checksum := checksum ^ x for x in salt_list[3:]]
 
         return checksum
