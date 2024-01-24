@@ -82,5 +82,5 @@ class Collector(metaclass=abc.ABCMeta):
 
         Returns: Nothing...
         """
-        with open(outfile_name, "w") as outfile:
+        with open(outfile_name, "w", encoding='utf-8') as outfile:
             json.dump(json_data, outfile, indent=4)
