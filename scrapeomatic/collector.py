@@ -69,5 +69,4 @@ class Collector(metaclass=abc.ABCMeta):
             proxy_dict = Collector.format_proxy(self.proxy)
         if self.use_session:
             return self.session.get(url, timeout=self.timeout, headers=headers, params=params, proxies=proxy_dict, verify=self.cert_path)
-        else:
-            return requests.get(url, timeout=self.timeout, headers=headers, params=params, proxies=proxy_dict, verify=self.cert_path)
+        return requests.get(url, timeout=self.timeout, headers=headers, params=params, proxies=proxy_dict, verify=self.cert_path)

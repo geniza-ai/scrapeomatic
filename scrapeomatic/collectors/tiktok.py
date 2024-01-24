@@ -29,7 +29,7 @@ class TikTok(Collector):
         final_url = f"{TIKTOK_BASE_URL}{username}"
 
         def intercept_response(response):
-            """capture all background requests and save them"""
+            """Capture all background requests and save them."""
             # We can extract details from background requests
             if response.request.resource_type == "xhr":
                 logging.debug(f"Appending {response.request.url}")
@@ -49,8 +49,8 @@ class TikTok(Collector):
             page.on("response", intercept_response)
 
             # Navigate to the profile page
-            page.goto(final_url, referer="https://www.tiktok.com")
-
+            page.goto(final_url, referer=final_url)
+            page.wait_for_timeout(1500)
             # Get the page content
             html = page.content()
 
@@ -68,8 +68,8 @@ class TikTok(Collector):
 
             user_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['user']
             stats_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['stats']
+
             """
-            
             button = page.get_by_text('p:has-text("Continue as guest")')
             guest_button = page.locator(selector="div", has=button)
             if guest_button is not None:

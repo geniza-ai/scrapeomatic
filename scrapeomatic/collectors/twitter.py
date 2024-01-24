@@ -6,8 +6,8 @@ from playwright.sync_api import sync_playwright, ProxySettings
 from playwright.sync_api import TimeoutError as PW_TimeoutError
 from requests import HTTPError
 from scrapeomatic.collector import Collector
-from scrapeomatic.utils.constants import DEFAULT_TIMEOUT, TWITTER_BASE_URL, PLAYWRIGHT_BLOCK_RESOURCE_TYPES, \
-    PLAYWRIGHT_BLOCK_RESOURCE_NAMES, DEFAULT_TWEET_TIMEOUT
+from scrapeomatic.utils.async_utils import AsyncUtils
+from scrapeomatic.utils.constants import DEFAULT_TIMEOUT, TWITTER_BASE_URL, DEFAULT_TWEET_TIMEOUT
 
 logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s')
 
@@ -17,21 +17,6 @@ DEFAULT_HEADERS = {
     "Sec-Fetch-Mode": "navigate",
     "Sec-Fetch-Site": "none"
 }
-
-
-def intercept_route(route):
-    """
-    Method to exclude unnecessary routes including images, fonts etc.
-    Args:
-        route: The inbound route.
-    """
-    if route.request.resource_type in PLAYWRIGHT_BLOCK_RESOURCE_TYPES:
-        logging.debug(f'blocking background resource {route.request} blocked type "{route.request.resource_type}"')
-        return route.abort()
-    if any(key in route.request.url for key in PLAYWRIGHT_BLOCK_RESOURCE_NAMES):
-        logging.debug(f"blocking background resource {route.request} blocked name {route.request.url}")
-        return route.abort()
-    return route.continue_()
 
 
 class Twitter(Collector):
@@ -69,7 +54,7 @@ class Twitter(Collector):
             context = browser.new_context(viewport={"width": 1920, "height": 1080})
             page = context.new_page()
 
-            page.route("**/*", intercept_route)
+            page.route("**/*", AsyncUtils.intercept_route)
 
             # enable background request intercepting:
             page.on("response", intercept_response)
@@ -169,7 +154,7 @@ class Twitter(Collector):
             page = context.new_page()
 
             # Block cruft
-            page.route("**/*", intercept_route)
+            page.route("**/*", AsyncUtils.intercept_route)
 
             # Enable background request intercepting:
             page.on("response", intercept_response)
