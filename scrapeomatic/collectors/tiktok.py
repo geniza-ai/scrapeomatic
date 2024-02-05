@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from pprint import pprint
 
 import emoji
@@ -28,16 +29,16 @@ class TikTok(Collector):
         _xhr_calls = []
         final_url = f"{TIKTOK_BASE_URL}{username}"
 
-        def intercept_response(response):
+        def intercept_response(background_response):
             """Capture all background requests and save them."""
             # We can extract details from background requests
-            if response.request.resource_type == "xhr":
-                logging.debug(f"Appending {response.request.url}")
-                _xhr_calls.append(response)
-            return response
+            if background_response.request.resource_type == "xhr":
+                logging.debug(f"Appending {background_response.request.url}")
+                _xhr_calls.append(background_response)
+            return background_response
 
         with sync_playwright() as pw_firefox:
-            browser = pw_firefox.firefox.launch(headless=True, timeout=self.timeout)
+            browser = pw_firefox.firefox.launch(headless=False, timeout=self.timeout)
             context = browser.new_context(viewport={"width": 1920, "height": 1080},
                                           strict_selectors=False)
             page = context.new_page()
@@ -62,6 +63,22 @@ class TikTok(Collector):
             # Parse it.
             soup = BeautifulSoup(html, 'html.parser')
 
+            # This closes the login buttons
+            login_button_text = re.compile(r'Continue (?:as guest)|(?:without login)')
+            buttons = page.get_by_text(login_button_text)
+            if buttons:
+                buttons.first.click()
+            page.wait_for_timeout(500)
+
+            # Now if there is a refresh button, click on that.
+            refresh_button_text = re.compile(r'Refresh')
+            refresh_buttons = page.get_by_text(refresh_button_text)
+            if refresh_buttons:
+                refresh_buttons.first.click(timeout=self.timeout)
+
+            page.wait_for_timeout(2500)
+            page.keyboard.press("PageDown")
+
             # The user info is contained in a large JS object called __UNIVERSAL_DATA_FOR_REHYDRATION__.
             tt_script = soup.find('script', attrs={'id': "__UNIVERSAL_DATA_FOR_REHYDRATION__"})
 
@@ -77,22 +94,11 @@ class TikTok(Collector):
             user_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['user']
             stats_data = raw_json['__DEFAULT_SCOPE__']['webapp.user-detail']['userInfo']['stats']
 
-            # button = page.get_by_text('p:has-text("Continue as guest")')
-            # guest_button = page.locator(selector="div", has=button)
-            # if guest_button is not None:
-            #     logging.debug("Clicking button.")
-            #     guest_button.click(no_wait_after=True)
-
-            # page.click('.css-dcgpa6-DivBoxContainer');
-            # page.click('.emuynwa3');
+            
             # page.wait_for_timeout(500)
             # page.keyboard.press("PageDown")
             # page.wait_for_timeout(500)
             # page.keyboard.press("PageDown")
-
-            data_calls = [f for f in _xhr_calls if "list" in f.url]
-            for call in data_calls:
-                logging.debug(call.json())
 
             profile_data = {
                 'sec_id': user_data['secUid'],
@@ -114,6 +120,11 @@ class TikTok(Collector):
                 # 'videos': videos,
                 # 'hashtags': self.hashtags
             }
+
+            video_lists = [f for f in _xhr_calls if "item_list" in f.url]
+            for xhr in video_lists:
+                print("Found it!!!")
+                print(xhr.url)
 
             return profile_data
 
