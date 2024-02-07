@@ -7,6 +7,8 @@ import emoji
 import ua_generator
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+from playwright.sync_api import Response
 from requests import JSONDecodeError
 
 from scrapeomatic.collector import Collector
@@ -29,10 +31,10 @@ class TikTok(Collector):
         _xhr_calls = []
         final_url = f"{TIKTOK_BASE_URL}{username}"
 
-        def intercept_response(background_response):
+        def intercept_response(background_response: Response) -> Response:
             """Capture all background requests and save them."""
             # We can extract details from background requests
-            if background_response.request.resource_type == "xhr":
+            if background_response.request.resource_type == "fetch":
                 logging.debug(f"Appending {background_response.request.url}")
                 _xhr_calls.append(background_response)
             return background_response
@@ -72,11 +74,19 @@ class TikTok(Collector):
 
             # Now if there is a refresh button, click on that.
             refresh_button_text = re.compile(r'Refresh')
-            refresh_buttons = page.get_by_text(refresh_button_text)
-            if refresh_buttons:
-                refresh_buttons.first.click(timeout=self.timeout)
 
-            page.wait_for_timeout(2500)
+            refresh_buttons = page.get_by_text(refresh_button_text)
+            refresh_found = True
+            while refresh_found:
+                if refresh_buttons:
+                    try:
+                        refresh_buttons.first.click(timeout=500)
+                        page.wait_for_timeout(1000)
+                    except PlaywrightTimeoutError:
+                        refresh_found = False
+                else:
+                    refresh_found = False
+
             page.keyboard.press("PageDown")
 
             # The user info is contained in a large JS object called __UNIVERSAL_DATA_FOR_REHYDRATION__.
@@ -125,6 +135,9 @@ class TikTok(Collector):
             for xhr in video_lists:
                 print("Found it!!!")
                 print(xhr.url)
+                xhr.finished()
+                page.wait_for_timeout(1500)
+                print(xhr.json())
 
             return profile_data
 
