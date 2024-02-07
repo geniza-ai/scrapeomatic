@@ -1,11 +1,10 @@
 import json
 import logging
-from pprint import pprint
 
 import emoji
 import ua_generator
 from bs4 import BeautifulSoup
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Response
 from requests import JSONDecodeError
 
 from scrapeomatic.collector import Collector
@@ -28,11 +27,12 @@ class TikTok(Collector):
         _xhr_calls = []
         final_url = f"{TIKTOK_BASE_URL}{username}"
 
-        def intercept_response(response):
+        def intercept_response(response: Response) -> Response:
             """Capture all background requests and save them."""
             # We can extract details from background requests
-            if response.request.resource_type == "xhr":
+            if response.request.resource_type == "fetch":
                 logging.debug(f"Appending {response.request.url}")
+                print(f"{response.request.url} {response.status_text}")
                 _xhr_calls.append(response)
             return response
 
@@ -86,13 +86,15 @@ class TikTok(Collector):
             # page.click('.css-dcgpa6-DivBoxContainer');
             # page.click('.emuynwa3');
             # page.wait_for_timeout(500)
-            # page.keyboard.press("PageDown")
-            # page.wait_for_timeout(500)
+            #page.keyboard.press("PageDown")
+            #page.wait_for_timeout(1500)
             # page.keyboard.press("PageDown")
 
-            data_calls = [f for f in _xhr_calls if "list" in f.url]
+            data_calls = [f for f in _xhr_calls if "item_list" in f.url]
             for call in data_calls:
-                logging.debug(call.json())
+                call.finished()
+                print("Video list")
+                print(call.json())
 
             profile_data = {
                 'sec_id': user_data['secUid'],
@@ -117,8 +119,71 @@ class TikTok(Collector):
 
             return profile_data
 
+    def get_video(self, username: str, video_id: str) -> dict:
+        """
+        Retrieves all available information about a given TikTok video. You must supply the username of the author
+        and the video id.  Both can be found in the URL for the TikTok video.
+        Args:
+            username: The username of the video author.
+            video_id: The ID of the video
+
+        Returns: A dictionary of the video metadata.
+
+        """
+        _xhr_calls = []
+        final_url = f"{TIKTOK_BASE_URL}{username}/video/{video_id}"
+
+        def intercept_response(response: Response) -> Response:
+            """Capture all background requests and save them."""
+            if response.request.resource_type == "fetch":
+                _xhr_calls.append(response)
+            return response
+
+        with sync_playwright() as pw_firefox:
+            browser = pw_firefox.firefox.launch(headless=True, timeout=self.timeout)
+            context = browser.new_context(viewport={"width": 1920, "height": 1080},
+                                          strict_selectors=False)
+            page = context.new_page()
+
+            # Block cruft
+            page.route("**/*", AsyncUtils.intercept_route)
+
+            # Enable background request intercepting:
+            page.on("response", intercept_response)
+
+            # Navigate to the profile page
+            response = page.goto(final_url, referer=final_url)
+            page.wait_for_timeout(1500)
+
+            if response.status != 200:
+                logging.error(f"Bad response: {response}")
+                raise ValueError(f"Error retrieving page: {response}")
+
+            # Get the page content
+            html = page.content()
+
+            # Parse it.
+            soup = BeautifulSoup(html, 'html.parser')
+
+            # The user info is contained in a large JS object called __UNIVERSAL_DATA_FOR_REHYDRATION__.
+            tt_script = soup.find('script', attrs={'id': "__UNIVERSAL_DATA_FOR_REHYDRATION__"})
+
+            try:
+                raw_json = json.loads(tt_script.string)
+            except AttributeError as exc:
+                raise JSONDecodeError(
+                    f"ScrapeOMatic was unable to parse the data for video {video_id}. Please try again.\n {exc}") from exc
+
+            data_calls = [f for f in _xhr_calls if "comment" in f.url]
+            for call in data_calls:
+                call.finished()
+                #data = call.json()
+
+
+        return raw_json['__DEFAULT_SCOPE__']['webapp.video-detail']['itemInfo']['itemStruct']
+
 
 if __name__ == '__main__':
     tiktok = TikTok()
-    results = tiktok.collect('brookemonk_')
-    pprint(results)
+    #results = tiktok.collect('brookemonk_')
+    results = tiktok.get_video("wydsonia", "7328217126613814570")

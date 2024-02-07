@@ -27,3 +27,9 @@ class TestTikTokScraper(unittest.TestCase):
             result = True
 
         self.assertTrue(result)
+
+    def test_video(self):
+        tiktok_scraper = TikTok()
+        results = tiktok_scraper.get_video("wydsonia", "7328217126613814570")
+        pprint(results)
+        self.assertIsNotNone(results)

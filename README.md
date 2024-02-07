@@ -92,7 +92,10 @@ post_info = threads_scraper.get_post(post_id)
 ## TikTok
 To pull data from TikTok, simply create a TikTok object, then call the `collect(<username>)` method.
 
-** Note:  TikTok made some breaking changes to their UI.  Currently the collect method will retrieve profile metadata, but not the video list. ** 
+### Other Methods 
+The TikTok collector also features a `get_video()` method which will retrieve all available metadata about a specific TikTok video.  You'll need the username of the author and the video id.  Both can be found in the URL for the video.
+For example, if you wanted to collect the following video: `https://www.tiktok.com/@yincardify/video/7322915114292710699`, you could call `get_video('yincardify', '7322915114292710699')`
+
 
 ### Example Usage
 
@@ -102,6 +105,9 @@ from scrapeomatic.collectors.tiktok import TikTok
 user_name = "<username>"
 tiktok_scraper = TikTok()
 results = tiktok_scraper.collect(user_name)
+
+# Get video info
+video_data = tiktok_scraper.get_video('yincardify', '7322915114292710699')
 ```
 
 The TikTok collector uses Selenium and the Chrome or FireFox extensions.  These must be installed for this collector to work.
@@ -163,8 +169,8 @@ Social Media platforms change their interfaces from time to time.  This table re
 |:---------|:------------------|
 | GitHub | Nov 15, 2023      |
 | Instagram | Nov 6, 2023       |
-| Threads | Jan 24, 2024 | 
-| TikTok | Jan 24, 2024      | 
+| Threads | Jan 24, 2024      | 
+| TikTok | Feb 6, 2024       | 
 | Twitter | Jan 14, 2024      |
 | YouTube | Nov 30, 2023      |
 
