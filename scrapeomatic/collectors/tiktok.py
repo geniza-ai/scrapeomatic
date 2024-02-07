@@ -1,6 +1,5 @@
 import json
 import logging
-from pprint import pprint
 
 import emoji
 import ua_generator
@@ -12,7 +11,7 @@ from scrapeomatic.collector import Collector
 from scrapeomatic.utils.async_utils import AsyncUtils
 from scrapeomatic.utils.constants import DEFAULT_TIMEOUT, TIKTOK_BASE_URL
 
-logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s - %(process)d - %(levelname)s - %(message)s', level=logging.INFO)
 
 ua = ua_generator.generate()
 user_agent = ua.text
@@ -178,7 +177,6 @@ class TikTok(Collector):
             data_calls = [f for f in _xhr_calls if "comment" in f.url]
             for call in data_calls:
                 call.finished()
-                print(call.text())
                 #data = call.json()
 
 
@@ -189,4 +187,3 @@ if __name__ == '__main__':
     tiktok = TikTok()
     #results = tiktok.collect('brookemonk_')
     results = tiktok.get_video("wydsonia", "7328217126613814570")
-
