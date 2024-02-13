@@ -32,7 +32,7 @@ class TikTok(Collector):
             # We can extract details from background requests
             if response.request.resource_type == "fetch":
                 logging.debug(f"Appending {response.request.url}")
-                print(f"{response.request.url} {response.status_text}")
+                logging.debug(f"{response.request.url} {response.status_text}")
                 _xhr_calls.append(response)
             return response
 
@@ -93,8 +93,6 @@ class TikTok(Collector):
             data_calls = [f for f in _xhr_calls if "item_list" in f.url]
             for call in data_calls:
                 call.finished()
-                print("Video list")
-                print(call.json())
 
             profile_data = {
                 'sec_id': user_data['secUid'],
