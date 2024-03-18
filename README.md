@@ -15,6 +15,7 @@ In general, scraping is legal if you are not logging into a website.  However, t
 
 Scrap-o-Matic will work with the following platforms:
 
+* [Facebook](#facebook)
 * [Github](#github)
 * [Instagram](#instagram)
 * [Threads](#threads)
@@ -26,6 +27,19 @@ Scrap-o-Matic will work with the following platforms:
 Every platform inherits from a `collector` object which has a minimum of one method: `collect(username)`.  The collectors may have additional methods, but at a minimum, you can use the `collect` method to get a dump of all the available data from the platform.
 
 Additionally, every collector has a `collect_to_dataframe` which will return the same information in a Pandas DataFrame.
+
+## Facebook
+To pull data from Facebook, simply create a Facebook object and call the collect method.
+
+### Example Usage
+```python
+from scrapeomatic.collectors.facebook import Facebook
+
+fb = Facebook()
+username = "<username>"
+profile_info = fb.collect(username)
+
+```
 
 ## Github
 To pull data from Github, simply create a Github object, then call the `collect(<username>)` method.
